@@ -1,0 +1,325 @@
+# This is shell script, (indirectly) sourced by uWSGI init.d script
+
+# uWSGI handles several types of configuration files.
+# This list contains extensions of configuration files recognized by uWSGI
+# (in alphabetical order).
+#
+# ! After changing of this list, appropriate changes must be made in functions:
+#   * conffile_option_name
+#   * extract_id_from_conffile
+UWSGI_CONFFILE_TYPES="db ini js json sqlite sqlite3 xml yaml yml"
+
+# Regular expression matching any of extension of uWSGI configuration files.
+#
+# Made in format of basic regexp and looks like '\(ini\|xml\)': spaces are
+# replaced with '\|' and whole expression is surrounded with '\(...\)'
+UWSGI_CONFFILE_TYPES_REGEXP="$(\
+  echo "$UWSGI_CONFFILE_TYPES" \
+  | sed -e 's/ /\\|/g' -e 's/^\(.*\)$/\\(\1\\)/g' \
+)"
+
+# Echo name of uWSGI option for handling of configuration file with given
+# extension.
+conffile_option_name()
+{
+  case "$1" in
+    ini)                echo ini       ;;
+    json|js)            echo json      ;;
+    sqlite|sqlite3|db)  echo sqlite    ;;
+    xml)                echo xmlconfig ;;
+    yaml|yml)           echo yaml      ;;
+  esac
+}
+
+# Extract extension of configuration file from it's path/name.
+type_of_conffile()
+{
+  # Configuration file name can contain newline character.
+  #
+  # So one's needed to process and return only last line from configuration
+  # file name.
+  echo "$@" | sed "\$s/^.*${UWSGI_CONFFILE_TYPES_REGEXP}\$/\1/g" | tail -1
+}
+
+# Get value of user-defined id (specifically, 'uid' or 'gid') ffrom uWSGI
+# configuration file.
+#
+# It parses configuration file $CONFFILE for value of first found "subsection"
+# $KIND. "Subsection" may be:
+# * assignment '$KIND =' in INI file
+# * hash value '"$KIND":' in JSON file
+# * row of 'uwsgi' table in SQLite3 database where value of first field equals
+#  '$KIND' (value of this subsection is the value of second field of the row)
+# * tag '<$KIND></$KIND>' in XML file
+# * hash value '$KIND:' in YAML file
+#
+# Echo found value or empty string if not found.
+extract_id_from_conffile()
+{
+  local KIND="$1"
+  shift
+  local CONFFILE="$@"
+
+  local CONFTYPE="$(type_of_conffile "$CONFFILE")"
+  local ID=""
+
+  case "$CONFTYPE" in
+    ini)
+      ID="$(
+        grep --max-count=1 "^\s*${KIND}\s*=" "$CONFFILE" \
+        | sed -e "s/^\s*${KIND}\s*=\s*\(.*\)\s*/\1/g"
+      )"
+    ;;
+
+    json|js)
+      ID="$(
+        grep --max-count=1 "^\s\+\"${KIND}\"\s*:" "$CONFFILE" \
+          | sed -e "s/^\s\+\"${KIND}\"\s*:\s*\"\(.*\)\"\s*\(,\|}\)\?\s*$/\1/g"
+      )"
+    ;;
+
+    sqlite|sqlite3|db)
+      local SQLITE3="/usr/bin/sqlite3"
+      local UWSGI_TABLE="uwsgi"
+      local UWSGI_TABLE_COUNT=''
+
+      if [ -e "$SQLITE3" ]; then
+        # Check for availability of uWSGI configuration table in database.
+        #
+        # Also check for validity of database (if there will be any errors in
+        # database opening, variable will stay empty).
+        UWSGI_TABLE_COUNT="$(
+          "$SQLITE3" -column -noheader "$CONFFILE" \
+            "SELECT COUNT(*) FROM sqlite_master WHERE name = '${UWSGI_TABLE}'"\
+            2>/dev/null
+        )"
+      fi
+
+      if [ "x${UWSGI_TABLE_COUNT%% *}" = "x1" ]; then
+        # Get names of first and second fields of uWSGI configuration table.
+        read FIRST_FIELD SECOND_FIELD <<-SQLITE3_OUTPUT
+          $(
+            "$SQLITE3" -line "$CONFFILE" "PRAGMA table_info(${UWSGI_TABLE});" \
+            | grep '^\s*name\s*=' \
+            | head -2 \
+            | sed -e 's/^\s*name\s*=\s*\(.*\)\s*$/\1/g' \
+            | tr '\n' ' '
+          )
+                SQLITE3_OUTPUT
+
+        # Now, query for user-defined id.
+        local QUERY_ID="SELECT ${SECOND_FIELD} \
+                        FROM ${UWSGI_TABLE} \
+                        WHERE ${FIRST_FIELD} = '${KIND}' \
+                        LIMIT 1"
+        ID="$(
+          "$SQLITE3" -column -noheader "$CONFFILE" \
+          "$QUERY_ID" \
+          2>/dev/null \
+        )"
+        ID="${ID%% *}" # strip trailing spaces
+      fi
+    ;;
+
+    xml)
+      ID="$(
+        grep --max-count=1 "<${KIND}>.\+</${KIND}>" "$CONFFILE" \
+        | sed -e "s/.*<${KIND}>\s*\(.*\)\s*<\/${KIND}>.*/\1/g"
+      )"
+    ;;
+
+    yaml|yml)
+      ID="$(
+        grep --max-count=1 "^\s\+${KIND}\s*:" "$CONFFILE" \
+        | sed -e "s/^\s\+${KIND}\s*:\s*\(.*\)\s*/\1/g"
+      )"
+    ;;
+  esac
+
+  echo "$ID"
+}
+
+# Given a configuration file name specification, look for it in uWSGI
+# configuraton directory.
+#
+# Echo relative path to first found configuration file, which conforms to given
+# specification and has extension from list of known extensions of
+# configuration files. If no such file was found echo empty string.
+#
+# Configuration file specification may consist of:
+# * configuration namespace and configuration file name delimited by slash
+#   ('app/site')
+# * configuration file name (just 'site'). Then default configuration namespace
+#   will be used
+relative_path_to_conffile_with_spec()
+{
+  local CONFSPEC="$@"
+
+  local CONFNAMESPACE="$(dirname "$CONFSPEC")"
+  local CONFNAME="$(basename "$CONFSPEC")"
+
+  if [ "x${CONFNAMESPACE}" = "x." ]; then
+    CONFNAMESPACE="$UWSGI_DEFAULT_CONFNAMESPACE"
+  fi
+
+  local APPS_CONFDIR="${CONFNAMESPACE}${UWSGI_APPS_CONFDIR_SUFFIX}"
+  local CONFFILE_PATH=""
+
+  for CONFFILE_EXT in ${UWSGI_CONFFILE_TYPES}; do
+    CONFFILE_PATH="$(
+      find \
+        "${UWSGI_CONFDIR}/${APPS_CONFDIR}" \
+         -name "${CONFNAME}.${CONFFILE_EXT}" -a -xtype f \
+      | head -1
+    )"
+    if [ -n "$CONFFILE_PATH" ]; then break; fi
+  done
+
+  if [ -n "$CONFFILE_PATH" ]; then
+    echo "${APPS_CONFDIR}/${CONFNAME}"
+  else
+    echo ""
+  fi
+}
+
+# Given a relative configuration file path, look for it in uWSGI configuration
+# directory.
+#
+# Relative path must consist of name of apps directory and name of
+# configuration file without extension. Example: 'apps-enabled/site'.
+#
+# Echo full path to first found configuration file, which located at given
+# apps directory (or it's subdirectory) and has extension from list of known
+# extensions of configuration files.
+absolute_path_to_conffile()
+{
+  local RELATIVE_CONFPATH="$@"
+  local APPS_CONFDIR="$(dirname "$RELATIVE_CONFPATH")"
+  local CONFFILE_NAME="$(basename "$RELATIVE_CONFPATH")"
+  local CONFFILE_PATH=""
+
+  for CONFFILE_EXT in ${UWSGI_CONFFILE_TYPES}; do
+    CONFFILE_PATH="$(
+      find \
+        "${UWSGI_CONFDIR}/${APPS_CONFDIR}" \
+         -name "${CONFFILE_NAME}.${CONFFILE_EXT}" -a -xtype f \
+      | head -1
+    )"
+    if [ -n "$CONFFILE_PATH" ]; then break; fi
+  done
+
+  echo "$CONFFILE_PATH"
+}
+
+# Get value of user-defined id (specifically, 'uid' or 'gid') for uWSGI
+# process.
+#
+# It parses configuration file with name $CONFNAME for value of first found
+# "subsection" $ID_KIND. See 'extract_id_from_conffile' for details.
+#
+# If not found, parse $INHERITED_CONFIG (defined in /etc/default/uwsgi),
+# for value of id.
+#
+# Echo found value or 'root' if value wasn't not found.
+extract_id()
+{
+  local ID_KIND="$1"
+  shift
+  local RELATIVE_CONFPATH="$@"
+
+  local CONFFILE="$(absolute_path_to_conffile "$RELATIVE_CONFPATH")"
+
+  local ID="$(extract_id_from_conffile "$ID_KIND" "$CONFFILE")"
+  if [ -z "$ID" -a -e "$INHERITED_CONFIG" ]; then
+    ID="$(extract_id_from_conffile "$ID_KIND" "$INHERITED_CONFIG")"
+  fi
+
+  if [ -z "$ID" ]; then
+    ID=root
+  fi
+
+  echo "$ID"
+}
+
+# Return configuration namespace extracted from relative path of configuration
+# file. Path should be relative to common uWSGI configuration directory.
+#
+# If common uWSGI configuration directory is '/etc/uwsgi' and caller is
+# interested in namespace of configuration file
+# '/etc/uwsgi/apps-enabled/site.ini', then 'apps-enabled/site' must be
+# provided as parameter to this function.
+#
+# Namespace is the name of first directory of relative path, but with stripped
+# suffix 's-enabled'.
+extract_confnamespace()
+{
+  local RELATIVE_CONFPATH="$@"
+
+  local CONFNAMESPACE="$(
+    echo "$RELATIVE_CONFPATH" \
+    | sed "s|^\([^/]\+\)${UWSGI_APPS_CONFDIR_SUFFIX}/.\+|\1|g"
+  )"
+
+  # If relative confpath didn't match to namespace pattern, then default
+  # namespace will be used.
+  if [ "x${CONFNAMESPACE}" = "x${RELATIVE_CONFPATH}" ]; then
+    echo "$UWSGI_DEFAULT_CONFNAMESPACE"
+  else
+    echo "$CONFNAMESPACE"
+  fi
+}
+
+# Return configuration file name extracted from relative path of configuration
+# file. Path should be relative to common uWSGI configuration directory.
+#
+# If common uWSGI configuration directory is '/etc/uwsgi' and caller is
+# interested in namespace of configuration file
+# '/etc/uwsgi/apps-enabled/site.ini', then 'apps-enabled/site' must be
+# provided as parameter to this function.
+extract_confname()
+{
+  local RELATIVE_CONFPATH="$@"
+  echo "$(basename "$RELATIVE_CONFPATH")"
+}
+
+# Location of /run subdirectory for specific uWSGI process.
+find_specific_rundir()
+{
+  local RELATIVE_CONFPATH="$@"
+
+  local CONFNAMESPACE="$(extract_confnamespace "$RELATIVE_CONFPATH")"
+  local CONFNAME="$(extract_confname "$RELATIVE_CONFPATH")"
+
+  echo "${UWSGI_RUNDIR}/${CONFNAMESPACE}/${CONFNAME}"
+}
+
+# Location of pidfile for specific uWSGI process.
+find_specific_pidfile()
+{
+  local RELATIVE_CONFPATH="$@"
+
+  local SPECIFIC_RUNDIR="$(find_specific_rundir "$RELATIVE_CONFPATH")"
+
+  echo "${SPECIFIC_RUNDIR}/pid"
+}
+
+# Assigns owner, group and permissions to pidfile of uWSGI process.
+chown_and_chmod_pidfile()
+{
+  local PIDFILE="$@"
+  local INTERVAL_START="$(date +%s)"
+  local INTERVAL_END="$(date +%s)"
+  local WAITING=2 # seconds
+
+  # Wait until daemon getting to create pidfile.
+  while [ ! -e "$PIDFILE" ]; do
+    INTERVAL_END="$(date +%s)"
+    if [ "$(expr "$INTERVAL_END" - "$INTERVAL_START")" -gt "$WAITING" ]; then
+      return
+    fi
+    sleep 0.05
+  done
+
+  chown root:root "$PIDFILE"
+  chmod 644 "$PIDFILE"
+}

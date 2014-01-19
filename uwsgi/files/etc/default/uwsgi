@@ -1,0 +1,30 @@
+# Defaults for uWSGI initscript
+# sourced by /etc/init.d/uwsgi
+
+# Run automatically at system startup?
+RUN_AT_STARTUP=yes
+
+# At startup VERBOSE value is setted in 'no'. So when user invokes
+# uWSGI init.d script, no output is showed.
+# It could be unexpected behaviour, because it is common practice for
+# init.d script to ignore VERBOSE value.
+# Here VERBOSE is overriden to conform such the practice.
+VERBOSE=yes
+
+# Should init.d script print configuration file names while marking progress of
+# it's execution?
+#
+# If 'no', then init.d script prints one-character symbols instead file names.
+#
+# Printing confnames is quite informative, but could mess terminal output or
+# be somewhat dangerous (as filename could contain arbitary characters).
+# ASCII control characters in file names are replaced with '?' in init.d script
+# output, nevertheless you were warned.
+PRINT_CONFNAMES_IN_INITD_SCRIPT_OUTPUT=no
+
+# init.d script starts instance of uWSGI daemon for each found user-created
+# configuration file.
+#
+# Options from inherited configuration file are passed to each instance by
+# default. They could be overrided (or extended) by user configuration file.
+INHERITED_CONFIG=/usr/share/uwsgi/conf/default.ini

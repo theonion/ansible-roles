@@ -1,6 +1,6 @@
 # America's Finest Ansible Roles
 
-This repo is an attempt to make some reusable, well tested ansible roles. These roles will include:
+This repo is an attempt to make some reusable, well tested ansible roles for ubuntu/debian systems. These roles will include:
 
  - [x] uwsgi
  - [ ] uwsgi-python-app

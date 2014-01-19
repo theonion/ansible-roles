@@ -1,0 +1,218 @@
+# This is shell script, sourced by uWSGI init.d script
+
+. /usr/share/uwsgi/init/snippets
+. /usr/share/uwsgi/init/specific_daemon
+
+do_command()
+{
+  local COMMAND="$1"
+  shift
+
+  local ERRORS=0
+
+  # If command is given with arguments, i.e. 'start smth smth_else'
+  if [ -n "$1" ]; then
+    [ "x$VERBOSE" != "xno" ] && log_progress_msg "->"
+
+    # Iterate over given configuration file specifications and:
+    # * either print notice that conforming conffile wasn't found (if it
+    #   wasn't)
+    # * or execute given command with conforming conffile
+    local CONFSPEC_PATH=""
+    for CONFSPEC in "$@"; do
+      CONFSPEC_RELPATH="$(relative_path_to_conffile_with_spec "$CONFSPEC")"
+      if [ -z "${CONFSPEC_RELPATH}" ]; then
+        log_progress_not_found "$CONFSPEC"
+      else
+        do_with_given_specific_daemon "$COMMAND" "$CONFSPEC_RELPATH"
+        ERRORS="$(expr "$ERRORS" + "$?")"
+      fi
+    done
+
+    [ "$ERRORS" -eq 0 ] && log_progress_done
+
+    return "$ERRORS"
+  fi
+
+  # Do not start daemon if it was disabled.
+  if [ "x$COMMAND" = "xstart" -a "x$RUN_AT_STARTUP" != "xyes" ]; then
+    [ "x$VERBOSE" != "xno" ] && log_progress_msg "(disabled; see /etc/default/${NAME})"
+    return 2
+  fi
+
+  local SOME_CONF_WAS_FOUND=no
+  local UWSGI_APPS_CONFDIRS="$(ls -1d ${UWSGI_APPS_CONFDIR_GLOB})"
+
+  # This construction is needed for supporting configuration file names with
+  # spaces or control characters.
+  #
+  # See http://www.dwheeler.com/essays/filenames-in-shell.html (paragraph #4).
+  #
+  # Predefined delimeters are resetted to null character (by changing IFS and
+  # setting -d option of 'read' command) and then:
+  # * 'find -print0' command is used for finding all available confnames
+  # * 'while ... read' loop is used for iterating over found confnames
+  # 
+  # Also process substitution is used, so that variables changed inside 'while'
+  # loop will retain their values after exiting from loop.
+  #
+  # By default 'find' command use emacs-style regexps. Emacs-style regexp
+  # processor with given regexp doesn't matches to file names with newline
+  # character. Posix-style regexp processor is working good.
+  #
+  # With executing 'sed' over found paths, relative configuration file
+  # paths are extracted from full paths provided with 'find' output.
+  # Firstly, common directory path (UWSGI_CONFDIR) is stripped from 'find'
+  # output. Secondly, all directories (except the first) and file extensions
+  # are stripped from result of first substitution.
+  #
+  # For example: list of found paths
+  # '/etc/uwsgi/apps-enabled/site.ini\0/etc/uwsgi/apps-enabled/dir/site2.ini'
+  # is transformed by sed into 'apps-enabled/site\0apps-enabled/site2'.
+  while IFS="" read -r -d "" RELATIVE_CONFPATH <&4 ; do
+    if [ "x$SOME_CONF_WAS_FOUND" = "xno" -a "x$VERBOSE" != "xno" ]; then
+      log_progress_msg "->"
+    fi
+    SOME_CONF_WAS_FOUND=yes
+    do_with_given_specific_daemon "$COMMAND" "$RELATIVE_CONFPATH"
+    ERRORS="$(expr "$ERRORS" + "$?")"
+  done 4< <(find "$UWSGI_APPS_CONFDIRS" \
+                  -regextype posix-basic \
+                  -iregex ".*\.${UWSGI_CONFFILE_TYPES_REGEXP}\$" -a -xtype f \
+                  -print0 \
+            | sed -e "s:\(^\|\x0\)${UWSGI_CONFDIR}/:\1:g" \
+                  -e "s:\([^\x0/]\+\)\([^\x0]\+\)\?/\([^/\x0]\+\)\.${UWSGI_CONFFILE_TYPES_REGEXP}\x0:\1/\3\x0:g" \
+            | sort --zero-terminated --unique \
+            )
+
+  if [ "x$VERBOSE" != "xno" ]; then
+    if [ "x$SOME_CONF_WAS_FOUND" = "xno" ]; then
+      log_progress_msg "(omitted; missing conffile(s) in ${UWSGI_APPS_CONFDIR_GLOB})"
+    elif [ "$ERRORS" -eq 0 ]; then
+      log_progress_done
+    fi
+  fi
+
+  return "$ERRORS"
+}
+
+do_with_given_specific_daemon()
+{
+  local COMMAND="$1"
+  shift
+  local RELATIVE_CONFPATH="$@"
+
+  local ERRORS=0
+
+  case "$COMMAND" in
+    start)        do_start_specific_daemon "$RELATIVE_CONFPATH" ;;
+    stop)         do_stop_specific_daemon "$RELATIVE_CONFPATH" ;;
+    force-reload) do_force_reload_specific_daemon "$RELATIVE_CONFPATH" ;;
+    reload|*)     do_reload_specific_daemon "$RELATIVE_CONFPATH" ;;
+  esac
+  case "$?" in
+    0) log_progress_ok "$RELATIVE_CONFPATH" ;;
+    1) log_progress_skip "$RELATIVE_CONFPATH" ;;
+    *) log_progress_error "$RELATIVE_CONFPATH"
+       ERRORS=1
+    ;;
+  esac
+
+  return "$ERRORS"
+}
+
+# Print progress notification about successful command execution.
+log_progress_ok()
+{
+  local RELATIVE_CONFPATH="$@"
+  local CONFNAME=""
+
+  [ "x$VERBOSE" = "xno" ] && return
+
+  if [ "x$PRINT_CONFNAMES_IN_INITD_SCRIPT_OUTPUT" != "xno" ]; then
+    CONFNAME="$(make_confname_for_progress_log "$RELATIVE_CONFPATH")"
+    log_progress_msg "$CONFNAME"
+  else
+    log_progress_msg '.'
+  fi
+}
+
+# Print progress notification about skipped command execution.
+#
+# It is printed, for example, when 'start' command was issued, but specific
+# daemon is already started. Or when 'stop' command was issued, but specific
+# daemon isn't runned yet.
+log_progress_skip()
+{
+  local RELATIVE_CONFPATH="$@"
+  local CONFNAME=""
+
+  [ "x$VERBOSE" = "xno" ] && return
+
+  if [ "x$PRINT_CONFNAMES_IN_INITD_SCRIPT_OUTPUT" != "xno" ]; then
+    CONFNAME="$(make_confname_for_progress_log "$RELATIVE_CONFPATH")"
+    log_progress_msg "(${CONFNAME})"
+  else
+    log_progress_msg "."
+  fi
+}
+
+# Print progress notification about missing configuration file with given
+# name.
+log_progress_not_found()
+{
+  local RELATIVE_CONFPATH="$@"
+  local CONFNAME=""
+
+  [ "x$VERBOSE" = "xno" ] && return
+
+  if [ "x$PRINT_CONFNAMES_IN_INITD_SCRIPT_OUTPUT" != "xno" ]; then
+    CONFNAME="$(make_confname_for_progress_log "$RELATIVE_CONFPATH")"
+  fi
+
+  log_progress_msg "${CONFNAME}?"
+}
+
+# Print progress notification about failed command execution.
+log_progress_error()
+{
+  local RELATIVE_CONFPATH="$@"
+  local CONFNAME=""
+
+  [ "x$VERBOSE" = "xno" ] && return
+
+  if [ "x$PRINT_CONFNAMES_IN_INITD_SCRIPT_OUTPUT" != "xno" ]; then
+    CONFNAME="$(make_confname_for_progress_log "$RELATIVE_CONFPATH")"
+  fi
+
+  log_progress_msg "${CONFNAME}!"
+}
+
+log_progress_done()
+{
+  log_progress_msg "done"
+}
+
+make_confname_for_progress_log()
+{
+  local RELATIVE_CONFPATH="$@"
+  local CONFNAMESPACE="$(extract_confnamespace "$RELATIVE_CONFPATH")"
+  local CONFNAME="$(extract_confname "$RELATIVE_CONFPATH")"
+
+  echo "$(sanitize_confname "${CONFNAMESPACE}/${CONFNAME}")"
+}
+
+# Sanitize configuration file name for printing it in terminal.
+sanitize_confname()
+{
+  local CONFNAME="$@"
+
+  # In sanitizing:
+  # * all control ASCII characters are replaced with '?' character
+  # * confname with spaces is surrounded by single quotes.
+  CONFNAME="$(echo -n "$CONFNAME" | tr '[\001-\037\177]' '?')"
+  case "$CONFNAME" in
+    *[[:space:]]*) echo "'$CONFNAME'" ;;
+    *)             echo "$CONFNAME"   ;;
+  esac
+}

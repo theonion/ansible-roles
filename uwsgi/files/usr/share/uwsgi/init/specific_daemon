@@ -1,0 +1,133 @@
+# This is shell script, (indirectly) sourced by uWSGI init.d script
+
+. /usr/share/uwsgi/init/snippets
+
+# Return:
+#  0 if daemon has been started
+#  1 if daemon was already running
+#  2 if daemon could not be started
+do_start_specific_daemon()
+{
+  local RELATIVE_CONFPATH="$@"
+
+  local CONFFILE="$(absolute_path_to_conffile "$RELATIVE_CONFPATH")"
+  if [ -z "$CONFFILE" ]; then
+    return 2
+  fi
+
+  local CONFNAMESPACE="$(extract_confnamespace "$RELATIVE_CONFPATH")"
+  local CONFNAME="$(extract_confname "$RELATIVE_CONFPATH")"
+
+  local UWSGI_UID="$(extract_id uid "$RELATIVE_CONFPATH")"
+  local UWSGI_GID="$(extract_id gid "$RELATIVE_CONFPATH")"
+
+  local SPECIFIC_RUNDIR="$(find_specific_rundir "$RELATIVE_CONFPATH")"
+  local PIDFILE="$(find_specific_pidfile "$RELATIVE_CONFPATH")"
+
+  install -d -o root -g root -m 755 "${UWSGI_RUNDIR}/${CONFNAMESPACE}"
+  install -d -o "$UWSGI_UID" -g "$UWSGI_GID" -m 755 "$SPECIFIC_RUNDIR"
+
+  start-stop-daemon --start --quiet \
+    --pidfile "$PIDFILE" \
+    --exec "$DAEMON" \
+    --test > /dev/null \
+      || return 1
+
+  local CONFTYPE="$(type_of_conffile "$CONFFILE")"
+  local CONFFILE_OPTION_NAME="$(conffile_option_name "$CONFTYPE")"
+
+  local INHERITED_TYPE="$(type_of_conffile "$INHERITED_CONFIG")"
+  local INHERITED_OPTION_NAME="$(conffile_option_name "$INHERITED_TYPE")"
+
+  # Value of an environment variable of form 'UWSGI_' is recognized by uWSGI as
+  # an option value and is available in configuration files.
+  #
+  # Value of (fake) option 'deb-confnamespace' is used in INHERITED inherited
+  # configuration file.
+  UWSGI_DEB_CONFNAMESPACE="$CONFNAMESPACE" \
+  UWSGI_DEB_CONFNAME="$CONFNAME" \
+  start-stop-daemon --start --quiet \
+    --pidfile "$PIDFILE" \
+    --exec "$DAEMON" \
+      -- --"${INHERITED_OPTION_NAME}" "${INHERITED_CONFIG}" \
+         --"${CONFFILE_OPTION_NAME}" "${CONFFILE}" \
+         --daemonize "/var/log/uwsgi/${CONFNAMESPACE}/${CONFNAME}.log" \
+    1> /dev/null 2>&1 \
+      || return 2
+
+  chown_and_chmod_pidfile "$PIDFILE"
+
+  start-stop-daemon --start --quiet \
+    --pidfile "$PIDFILE" \
+    --exec "$DAEMON" \
+    --test > /dev/null \
+      && return 2
+
+  return 0
+}
+
+# Return:
+#  0 if daemon has been stopped
+#  1 if daemon was already stopped
+#  2 if daemon could not be stopped
+#  other if a failure occurred
+do_stop_specific_daemon()
+{
+  local RELATIVE_CONFPATH="$@"
+  local SPECIFIC_RUNDIR="$(find_specific_rundir "$RELATIVE_CONFPATH")"
+  local PIDFILE="$(find_specific_pidfile "$RELATIVE_CONFPATH")"
+
+  start-stop-daemon --stop --quiet \
+    --retry=QUIT/30/KILL/5 \
+    --pidfile "$PIDFILE" \
+    --name "$NAME"
+
+  RETVAL="$?"
+  [ "$RETVAL" = 2 ] && return 2
+
+  rm -rf "$SPECIFIC_RUNDIR"
+
+  return "$RETVAL"
+}
+
+# Return:
+#  0 if daemon has been reloaded
+#  3 if daemon could not be reloaded
+do_reload_specific_daemon()
+{
+  local RELATIVE_CONFPATH="$@"
+  local PIDFILE="$(find_specific_pidfile "$RELATIVE_CONFPATH")"
+
+  start-stop-daemon --stop --quiet \
+    --signal=HUP \
+    --pidfile "$PIDFILE" \
+    --name "$NAME"
+
+  RETVAL="$?"
+
+  # There is no such process, nothing to reload!
+  [ "$RETVAL" = 1 ] && RETVAL=3
+
+  return "$RETVAL"
+}
+
+# Return:
+#  0 if daemon has been reloaded
+#  3 if daemon could not be reloaded
+do_force_reload_specific_daemon()
+{
+  local RELATIVE_CONFPATH="$@"
+  local PIDFILE="$(find_specific_pidfile "$RELATIVE_CONFPATH")"
+
+  start-stop-daemon --stop --quiet \
+    --signal=TERM \
+    --pidfile "$PIDFILE" \
+    --name "$NAME"
+
+  RETVAL="$?"
+
+  # There is no such process, nothing to reload!
+  [ "$RETVAL" = 1 ] && RETVAL=3
+
+  return "$RETVAL"
+}
