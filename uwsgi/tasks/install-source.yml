@@ -27,3 +27,6 @@
 - name: source | Move the binary
   command: mv /tmp/uwsgi-{{ uwsgi_version }}/uwsgi /usr/bin/uwsgi
   when: uwsgi_exists|failed
+
+# Set the binary path
+- set_fact: uwsgi_binary="/usr/bin/uwsgi"

@@ -10,3 +10,5 @@
 - name: pip | Make sure that uwsgi is installed
   pip: name=uwsgi version={{ uwsgi_version }}
 
+# Set the binary path
+- set_fact: uwsgi_binary="/usr/local/bin/uwsgi"
