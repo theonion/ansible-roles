@@ -1,0 +1,3 @@
+---
+- name: Test that uwsgi is installed
+  shell: which uwsgi

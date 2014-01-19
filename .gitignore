@@ -1,0 +1,3 @@
+.vagrant
+playbook.yml
+vagrant_ansible_inventory_default
