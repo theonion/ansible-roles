@@ -10,7 +10,6 @@ if [ ${#TESTS[@]} -eq 0 ]; then
     cd ..
 fi
 
-
 for TEST_NAME in $TESTS ; do
   echo "*****************************"
   echo "*** $TEST_NAME..."
