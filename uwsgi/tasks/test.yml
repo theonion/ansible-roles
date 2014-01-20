@@ -1,3 +1,18 @@
 ---
-- name: Test that uwsgi is installed
-  shell: which uwsgi
+
+# Test for directories that should exist
+- shell: test -d {{ item }}
+  with_items:
+    - /etc/uwsgi/apps-enabled
+    - /etc/uwsgi/apps-available
+    - /var/log/uwsgi/app
+
+# Test for files that should exist
+- shell: test -e {{ item }}
+  with_items:
+    - /etc/init.d/uwsgi
+    - /etc/default/uwsgi
+    - /usr/share/uwsgi/conf/default.ini
+    - /usr/share/uwsgi/init/do_command
+    - /usr/share/uwsgi/init/snippets
+    - /usr/share/uwsgi/init/specific_daemon

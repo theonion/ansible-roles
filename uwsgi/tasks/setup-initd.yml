@@ -1,0 +1,19 @@
+---
+# This task file sets up uwsgi in Emperor mode, with init.d scripts
+
+
+# Add the uwsgi default file
+- copy: dest=/etc/default/uwsgi src=etc/default/uwsgi owner=root group=www-data
+
+# Add the uwsgi configuration files
+- copy: dest=/usr/share/ src=usr/share/uwsgi owner=root group=www-data
+
+# Create the init.d script
+- template: src=etc/init.d/uwsgi.j2 dest=/etc/init.d/uwsgi owner=root group=www-data mode=655
+
+# Create the log and app directories
+- file: path={{ item }} state=directory owner=root group=www-data
+  with_items:
+    - /var/log/uwsgi/app
+    - /etc/uwsgi/apps-available
+    - /etc/uwsgi/apps-enabled

@@ -10,10 +10,22 @@ if [ ${#TESTS[@]} -eq 0 ]; then
     cd ..
 fi
 
+log_test () {
+    TEST_NAME=$1
+    STARS=$((${#1} + 14))
+    for i in $(eval echo "{1..$STARS}"); do
+        echo -ne "*"
+    done
+    echo "*"
+    echo "* Testing $1... *"
+    for i in $(eval echo "{1..$STARS}"); do
+        echo -ne "*"
+    done
+    echo "*"
+}
+
 for TEST_NAME in $TESTS ; do
-  echo "*****************************"
-  echo "*** $TEST_NAME..."
-  echo "*****************************"
+  log_test $TEST_NAME
   cp "tests/$TEST_NAME" ./playbook.yml
   vagrant destroy --force &> /dev/null
   vagrant up --no-provision &> /dev/null

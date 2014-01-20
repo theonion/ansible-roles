@@ -30,3 +30,5 @@
 
 # Set the binary path
 - set_fact: uwsgi_binary="/usr/bin/uwsgi"
+
+- include: setup-initd.yml
