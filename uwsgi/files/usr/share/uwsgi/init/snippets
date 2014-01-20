@@ -105,7 +105,7 @@ extract_id_from_conffile()
             | sed -e 's/^\s*name\s*=\s*\(.*\)\s*$/\1/g' \
             | tr '\n' ' '
           )
-                SQLITE3_OUTPUT
+				SQLITE3_OUTPUT
 
         # Now, query for user-defined id.
         local QUERY_ID="SELECT ${SECOND_FIELD} \
