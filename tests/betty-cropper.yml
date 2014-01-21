@@ -1,0 +1,20 @@
+---
+- hosts: all
+  roles:
+    - uwsgi
+    - { role: uwsgi-python-app,
+        app_name: "betty-cropper",
+        python_packages: ['https://github.com/theonion/betty-cropper/archive/master.zip'],
+        system_packages: ['libmagickwand5', 'libpq-dev', 'git-core', 'python-dev'],
+        uwsgi: {
+            module: "betty:app",
+            socket: ":8080"
+        },
+        user: {
+            name: "betty-cropper",
+            home: "/var/betty-cropper"
+        }
+    }
+  sudo: yes
+  vars:
+    uwsgi_install_method: pip

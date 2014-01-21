@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # This bash script basically builds and destroys a series of vagrant boxes, using a different playbook for each.
 
@@ -27,6 +27,7 @@ log_test () {
 for TEST_NAME in $TESTS ; do
   log_test $TEST_NAME
   cp "tests/$TEST_NAME" ./playbook.yml
+  ansible-playbook --syntax-check -i vagrant_ansible_inventory_default playbook.yml
   vagrant destroy --force &> /dev/null
   vagrant up --no-provision &> /dev/null
   vagrant provision

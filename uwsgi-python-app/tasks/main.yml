@@ -1,0 +1,41 @@
+---
+# Installs and configures a uWSGI python app in a virtualenv
+
+# Make sure that pip and virtualenv are installed.
+- apt: name=python-pip state=present
+
+# Make sure that virtualenv is installed
+- pip: name=virtualenv state=present
+
+# Install system packages
+- apt: name={{item}} state=present
+  with_items: system_packages
+
+# Create the user
+- user: name={{ user.name }} home={{ user.home }} createhome=no group=www-data
+  when: user.home == source_dir
+
+# Create the user
+- user: name={{ user.name }} home={{ user.home }} createhome=no group=www-data
+  when: user.home != source_dir
+
+# Make sure that the user has an .ssh directory
+- file: path={{ user.home }}/.ssh state=directory mode=700 owner={{ user.name }}
+
+# Make sure that the authorized_keys exist
+- lineinfile: dest={{ user.home }}/.ssh/authorized_keys mode=644 owner={{ user }} create=yes line={{ item }}
+  with_items: authorized_keys
+
+# Add necessary environmental variables to the user's .profile
+- lineinfile: dest={{ user.home }}/.profile mode=700 owner={{ user.name }} create=yes line="export {{ item }}"
+  with_items: env_vars
+
+# On login, users should source the virtualenv, and cd to the source directory
+- lineinfile: dest={{ user.home }}/.profile mode=700 owner={{ user.name }} create=yes line="source {{ virtualenv_dir }}/bin/activate && cd {{ source_dir }}"
+
+# Install python packages
+- pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }}
+  with_items: python_packages
+
+# Create a uwsgi configuration file
+- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}

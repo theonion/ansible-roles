@@ -1,0 +1,11 @@
+[uwsgi]
+home = {{ virtualenv_dir }}
+chdir = {{ source_dir }}
+
+{% for env_var in env_vars%}
+env = {{ env_var }}
+{% endfor %}
+
+{% for key, value in uwsgi.iteritems() %}
+{{ key }} = {{ value }}
+{% endfor %}
