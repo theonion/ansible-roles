@@ -1,0 +1,4 @@
+---
+
+# Make sure that we can load up the nginx page
+- shell: curl http://localhost/index.html

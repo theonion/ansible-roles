@@ -1,0 +1,31 @@
+---
+betty_database: "sqlite:////tmp/betty.db"
+betty_image_root: "/var/betty-cropper"
+betty_server_name: "localhost"
+betty_server_path: "/"
+betty_public_url: "http://{{ betty_server_name }}{{ betty_server_path }}"
+betty_ratios:
+  - "1x1"
+  - "2x1"
+  - "3x1"
+  - "3x4"
+  - "4x3"
+  - "16x9"
+betty_widths:
+  - 80
+  - 150
+  - 240
+  - 300
+  - 320
+  - 400
+  - 480
+  - 620
+  - 640
+  - 820
+  - 960
+  - 1200
+  - 1600
+betty_api_key: null
+betty_placeholder: true
+betty_placeholder_font: /etc/betty-cropper/OpenSans-Semibold.ttf
+betty_sentry_dsn: null

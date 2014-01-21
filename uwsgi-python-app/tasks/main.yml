@@ -38,4 +38,11 @@
   with_items: python_packages
 
 # Create a uwsgi configuration file
-- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}
+- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini
+
+# Add the apps-enabled symlink
+- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link
+  when: app_enabled
+
+# Make sure that uWSGI is started
+- service: name=uwsgi state=started

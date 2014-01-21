@@ -1,0 +1,17 @@
+---
+
+# Create the config file
+- template: dest=/etc/betty-cropper/settings.py src=settings.py.j2 owner=betty-cropper group=www-data
+
+# Add the fonts
+- copy: dest=/etc/betty-cropper/{{ item }} src={{ item }}
+  with_items:
+    - Lato-Hai.ttf
+    - OpenSans-Semibold.ttf
+
+# Make sure the root directory exists
+- file: path={{ betty_image_root }} owner=betty-cropper group=www-data
+
+# Add the nginx config
+- template: dest=/etc/nginx/conf.d/betty-cropper.conf src=betty-cropper.conf.j2
+  notify: Restart nginx

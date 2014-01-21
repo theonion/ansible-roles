@@ -2,7 +2,7 @@
 - hosts: all
   pre_tasks:
     - file: dest=/www/test-flask state=directory
-    - copy: dest=/www/test-flask/testapp.py src=test_files/testapp.py
+    - copy: dest=/www/test-flask/testapp.py src=tests/data/testapp.py
   roles:
     - uwsgi
     - { role: uwsgi-python-app,
@@ -12,7 +12,8 @@
             module: "testapp:app",
             http: ":8080",
             master: "true"
-        }
+        },
+        app_enabled: True
     }
   sudo: yes
   vars:

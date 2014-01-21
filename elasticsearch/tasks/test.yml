@@ -7,4 +7,4 @@
 - wait_for: port=9200 timeout=30
 
 # Check to make sure that we can get the status
-- shell: curl http://127.0.0.1:9200/_status
+- shell: curl http://127.0.0.1:9300/_status

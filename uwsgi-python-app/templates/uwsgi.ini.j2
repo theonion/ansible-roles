@@ -1,6 +1,8 @@
 [uwsgi]
 home = {{ virtualenv_dir }}
+pythonpath = {{ source_dir }}
 chdir = {{ source_dir }}
+username = {{ user.name }}
 
 {% for env_var in env_vars%}
 env = {{ env_var }}

@@ -2,6 +2,7 @@
 # Defaults for python uwsgi apps
 virtualenv_dir: "/var/venvs/{{ app_name }}"
 source_dir: "/www/{{ app_name }}"
+app_enabled: False
 user:
   name: "{{ app_name }}"
   home: "{{ source_dir }}"

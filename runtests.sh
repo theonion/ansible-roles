@@ -5,9 +5,9 @@
 TESTS=("$@")
 
 if [ ${#TESTS[@]} -eq 0 ]; then
-    cd tests
+    cd tests/playbooks
     TESTS=(*)
-    cd ..
+    cd ../..
 fi
 
 log_test () {
@@ -26,7 +26,7 @@ log_test () {
 
 for TEST_NAME in $TESTS ; do
   log_test $TEST_NAME
-  cp "tests/$TEST_NAME" ./playbook.yml
+  cp "tests/playbooks/$TEST_NAME" ./playbook.yml
   if [ -e vagrant_ansible_inventory_default ]
   then 
     ansible-playbook --syntax-check -i vagrant_ansible_inventory_default playbook.yml

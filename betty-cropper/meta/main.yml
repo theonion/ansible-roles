@@ -1,0 +1,16 @@
+---
+dependencies:
+    - { role: nginx }
+    - { role: uwsgi-python-app,
+        app_name: "betty-cropper",
+        python_packages: ["https://github.com/theonion/betty-cropper/archive/master.zip"],
+        system_packages: ["libmagickwand5", "libpq-dev", "python-dev"],
+        uwsgi: {
+            module: "betty:app",
+            socket: "127.0.0.1:8080",
+            master: "true",
+            lazy: "true"
+        },
+        app_enabled: True,
+        source_dir: "/etc/betty-cropper"
+    }

@@ -1,0 +1,28 @@
+---
+
+# Make sure the python-pycurl is installed
+- apt: name=python-pycurl update_cache=yes cache_valid_time=3600
+
+# Add the nginx apt key
+- apt_key: url=http://nginx.org/keys/nginx_signing.key id=7BD9BF62 state=present
+
+# Add the nginx apt repo for debian (There's a hack here until this issue is solved https://github.com/ansible/ansible/issues/4565)
+- apt_repository: repo="deb http://nginx.org/packages/debian/ {% if ansible_distribution_release != 'NA' %}{{ansible_distribution_release}}{% else %}wheezy{% endif %} nginx" state=present
+  when: ansible_distribution == "Debian"
+  register: nginx_repository
+
+# Add the nginx apt repo for ubuntu
+- apt_repository: repo="deb http://nginx.org/packages/ubuntu/ {{ansible_distribution_release}} nginx" state=present
+  when: ansible_distribution == "Ubuntu"
+  register: nginx_repository
+
+# Install the package with a cache update
+- apt: name=nginx={{ nginx_version }} state=present update_cache=yes
+  when: nginx_repository|changed
+
+# Install the package without a cache update
+- apt: name=nginx={{ nginx_version }} state=present
+  when: not nginx_repository|changed
+
+# Make sure nginx is running
+- service: name=nginx state=started
