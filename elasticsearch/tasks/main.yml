@@ -20,5 +20,17 @@
 # Update repositories cache and install elasticsearch
 - apt: name=elasticsearch={{ elasticsearch_version }} update_cache=yes
 
+# Install plugins
+- command: /usr/share/elasticsearch/bin/plugin -install {{ item }}
+  with_items: elasticsearch_plugins
+
+# Update the elasticsearch settings
+- lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml line='{{ item[0] }}: {{ item[1] }}' regexp='(# )?{{ item[0] }}:' state=present"
+  with_items: elasticsearch_settings.items()
+  notify: Restart elasticsearch
+
+# Make sure that elasticsearch is started
+- service: name=elasticsearch state=started
+
 - include: test.yml
   when: run_tests

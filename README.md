@@ -3,11 +3,11 @@
 This repo is an attempt to make some reusable, well tested ansible roles for ubuntu/debian systems. These roles will include:
 
 - [x] uwsgi
-- [ ] uwsgi-python-app
+- [x] uwsgi-python-app
 - [ ] collectd
 - [ ] nginx
 - [ ] memcached
-- [ ] elasticsearch
+- [x] elasticsearch
 - [ ] postgresql
 - [ ] redis
 - [ ] rabbitmq

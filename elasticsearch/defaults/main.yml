@@ -1,3 +1,6 @@
 ---
 # Variable for Elasticsearch Installation
 elasticsearch_version: "0.90.10"
+elasticsearch_settings:
+  network.bind_host: "127.0.0.1"
+elasticsearch_plugins: []

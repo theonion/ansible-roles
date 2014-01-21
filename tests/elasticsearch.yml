@@ -3,3 +3,10 @@
   roles:
     - elasticsearch
   sudo: yes
+  vars:
+    elasticsearch_version: "0.90.9"
+    elasticsearch_settings:
+      network.host: "127.0.0.1"
+      network.port: "9300"
+    elasticsearch_plugins:
+      - elasticsearch/elasticsearch-river-twitter/1.5.0-SNAPSHOT
