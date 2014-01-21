@@ -57,5 +57,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
     ansible.extra_vars = { run_tests: true }
+    ansible.inventory_path = "inventory"
   end
 end
