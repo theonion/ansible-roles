@@ -1,0 +1,3 @@
+---
+# Variable for Elasticsearch Installation
+elasticsearch_version: "0.90.10"

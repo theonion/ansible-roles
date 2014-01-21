@@ -27,7 +27,11 @@ log_test () {
 for TEST_NAME in $TESTS ; do
   log_test $TEST_NAME
   cp "tests/$TEST_NAME" ./playbook.yml
-  ansible-playbook --syntax-check -i vagrant_ansible_inventory_default playbook.yml
+  if [ -e vagrant_ansible_inventory_default ]
+  then 
+    ansible-playbook --syntax-check -i vagrant_ansible_inventory_default playbook.yml
+  fi
+
   vagrant destroy --force &> /dev/null
   vagrant up --no-provision &> /dev/null
   vagrant provision

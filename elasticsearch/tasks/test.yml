@@ -1,0 +1,4 @@
+---
+
+# Make sure ES is responsive
+- shell: curl http://localhost:9200?_status

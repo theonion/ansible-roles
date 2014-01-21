@@ -1,0 +1,24 @@
+---
+
+# Install PyCurl, and Java
+- apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - python-pycurl
+    - openjdk-7-jre
+
+# Add the apt key for the elasticsearch repo
+- apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
+
+# Add the elasticsearch 0.90.x apt repo
+- apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/0.90/debian stable main" state=present
+  when: elasticsearch_version.startswith("0.90.")
+
+# Add the elasticsearch 1.x apt repo
+- apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/1.0/debian stable main" state=present
+  when: elasticsearch_version.startswith("1.")
+
+# Update repositories cache and install elasticsearch
+- apt: name=elasticsearch={{ elasticsearch_version }} update_cache=yes
+
+- include: test.yml
+  when: run_tests
