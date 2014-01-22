@@ -7,9 +7,9 @@
     - uwsgi
     - { role: uwsgi-python-app,
         app_name: "test-flask",
-        python_packages: ['Flask'],
+        python_packages: ['werkzeug'],
         uwsgi: {
-            module: "testapp:app",
+            module: "werkzeug:testapp",
             http: ":8080",
             master: "true"
         },

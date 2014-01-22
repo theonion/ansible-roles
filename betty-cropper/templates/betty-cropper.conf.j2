@@ -6,6 +6,7 @@ server {
 
     location @betty {
         {% if betty_server_path not in ("/", None) %}rewrite  ^{{ betty_server_path }}(.*)$ /$1 break;{% endif %}
+        include uwsgi_params;
         uwsgi_pass 127.0.0.1:8080;
     }
 

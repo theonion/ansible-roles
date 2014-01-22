@@ -15,7 +15,7 @@ This repo is an attempt to make some reusable, well tested ansible roles for ubu
 
 # Testing
 
-Each test case is a single playbook, which is run on a fresh VM.
+Each test case is a single playbook, which is run on a fresh VM. You'll want to have a version of Vagrant > 1.4.
 
 To run all tests:
 
