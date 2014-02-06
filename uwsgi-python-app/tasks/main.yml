@@ -12,26 +12,29 @@
   with_items: system_packages
 
 # Create the user
-- user: name={{ user.name }} home={{ user.home }} createhome=no group=www-data
-  when: user.home == source_dir
+- user: name={{ appuser.name }} home={{ appuser.home }} shell=/bin/bash createhome=no group=www-data
+  when: appuser.home == source_dir
 
 # Create the user
-- user: name={{ user.name }} home={{ user.home }} createhome=no group=www-data
-  when: user.home != source_dir
+- user: name={{ appuser.name }} home={{ appuser.home }} shell=/bin/bash createhome=no group=www-data
+  when: appuser.home != source_dir
+
+# Make sure that the source directory exists
+- file: path={{ source_dir }} state=directory mode=750 owner={{ appuser.name }} group=www-data
 
 # Make sure that the user has an .ssh directory
-- file: path={{ user.home }}/.ssh state=directory mode=700 owner={{ user.name }}
+- file: path={{ appuser.home }}/.ssh state=directory mode=700 owner={{ appuser.name }} group=www-data
 
 # Make sure that the authorized_keys exist
-- lineinfile: dest={{ user.home }}/.ssh/authorized_keys mode=644 owner={{ user }} create=yes line={{ item }}
+- lineinfile: dest={{ appuser.home }}/.ssh/authorized_keys mode=644 owner={{ appuser.name }} group=www-data create=yes line="{{ item }}"
   with_items: authorized_keys
 
 # Add necessary environmental variables to the user's .profile
-- lineinfile: dest={{ user.home }}/.profile mode=700 owner={{ user.name }} create=yes line="export {{ item }}"
+- lineinfile: dest={{ appuser.home }}/.profile mode=700 owner={{ appuser.name }} group=www-data create=yes line="export {{ item }}"
   with_items: env_vars
 
 # On login, users should source the virtualenv, and cd to the source directory
-- lineinfile: dest={{ user.home }}/.profile mode=700 owner={{ user.name }} create=yes line="source {{ virtualenv_dir }}/bin/activate && cd {{ source_dir }}"
+- lineinfile: dest={{ appuser.home }}/.profile mode=700 owner={{ appuser.name }} group=www-data create=yes line="source {{ virtualenv_dir }}/bin/activate && cd {{ source_dir }}"
 
 # Install python packages
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }}
