@@ -38,13 +38,14 @@
 
 # Install python packages
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }}
+  sudo_user: www-data
   with_items: python_packages
 
 # Create a uwsgi configuration file
-- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini owner=www-data group=www-data
+- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini owner={{ appuser.name }} group=www-data
 
 # Add the apps-enabled symlink
-- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link owner=www-data group=www-data
+- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link owner={{ appuser.name }} group=www-data
   when: app_enabled
 
 # Make sure that uWSGI is started
