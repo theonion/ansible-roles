@@ -2,7 +2,7 @@
 # Installs and configures a uWSGI python app in a virtualenv
 
 # Make sure that pip and virtualenv are installed.
-- apt: name=python-pip state=present
+- apt: name=python-pip state=present update_cache=yes cache_valid_time=3600
 
 # Make sure that virtualenv is installed
 - pip: name=virtualenv state=present
@@ -11,41 +11,32 @@
 - apt: name={{item}} state=present
   with_items: system_packages
 
-# Create the user
-- user: name={{ appuser.name }} home={{ appuser.home }} shell=/bin/bash createhome=no group=www-data
-  when: appuser.home == source_dir
+# Make sure that the www directory exists
+- file: path=/www/ state=directory mode=750 owner=www-data group=www-data
 
-# Create the user
-- user: name={{ appuser.name }} home={{ appuser.home }} shell=/bin/bash createhome=no group=www-data
-  when: appuser.home != source_dir
+# Create the user (if necessary)
+- user: name={{ appuser }} shell=/bin/bash createhome=yes group=www-data
+  when: appuser == "www-data"
 
 # Make sure that the source directory exists
-- file: path={{ source_dir }} state=directory mode=750 owner={{ appuser.name }} group=www-data
+- file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
 
-# Make sure that the user has an .ssh directory
-- file: path={{ appuser.home }}/.ssh state=directory mode=700 owner={{ appuser.name }} group=www-data
-
-# Make sure that the authorized_keys exist
-- lineinfile: dest={{ appuser.home }}/.ssh/authorized_keys mode=644 owner={{ appuser.name }} group=www-data create=yes line="{{ item }}"
+# Set the authorized_keys
+- authorized_key: user={{ appuser }} key="{{ item }}"
   with_items: authorized_keys
 
-# Add necessary environmental variables to the user's .profile
-- lineinfile: dest={{ appuser.home }}/.profile mode=700 owner={{ appuser.name }} group=www-data create=yes line="export {{ item }}"
-  with_items: env_vars
-
-# On login, users should source the virtualenv, and cd to the source directory
-- lineinfile: dest={{ appuser.home }}/.profile mode=700 owner={{ appuser.name }} group=www-data create=yes line="source {{ virtualenv_dir }}/bin/activate && cd {{ source_dir }}"
-
 # Install python packages
-- pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }}
-  sudo_user: www-data
+- pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   with_items: python_packages
 
+# Create virtualenv directory
+- file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data recurse=yes
+
 # Create a uwsgi configuration file
-- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini owner={{ appuser.name }} group=www-data
+- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini owner={{ appuser }} group=www-data
 
 # Add the apps-enabled symlink
-- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link owner={{ appuser.name }} group=www-data
+- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link owner={{ appuser }} group=www-data
   when: app_enabled
 
 # Make sure that uWSGI is started

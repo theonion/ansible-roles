@@ -58,5 +58,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ansible.playbook = "playbook.yml"
     ansible.extra_vars = { run_tests: true }
     ansible.inventory_path = "inventory"
+    ansible.verbose = "v"
   end
+
+  config.vm.provider "virtualbox" do |v|
+    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+  end
+
 end
