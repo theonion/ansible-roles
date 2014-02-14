@@ -31,7 +31,7 @@ for TEST_NAME in $TESTS ; do
   ansible-playbook --syntax-check -i inventory playbook.yml
 
   vagrant destroy --force &> /dev/null
-  vagrant up --no-provision &> /dev/null
+  vagrant up --no-provision
   vagrant provision
   rm ./playbook.yml
 done
