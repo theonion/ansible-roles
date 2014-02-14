@@ -2,12 +2,10 @@
 home = {{ virtualenv_dir }}
 pythonpath = {{ source_dir }}
 chdir = {{ source_dir }}
-username = {{ appuser.name }}
-
-{% for env_var in env_vars%}
+{% if appuser != "www-data" %}username = {{ appuser }}{% endif %}
+{% for env_var in env_vars %}
 env = {{ env_var }}
 {% endfor %}
-
 {% for key, value in uwsgi.iteritems() %}
 {{ key }} = {{ value }}
 {% endfor %}

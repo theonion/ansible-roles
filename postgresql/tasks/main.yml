@@ -1,0 +1,27 @@
+---
+# Sets up and configures postgres
+
+- name: install postgres server
+  apt: pkg={{ item }} state=present update_cache=yes
+  with_items:
+    - postgresql-{{ postgres_version }}
+    - libpq-dev
+    - python-psycopg2
+
+- name: update postgresql.conf
+  lineinfile: 
+    dest: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf 
+    insertbefore: "^#listen_addresses ="
+    line: listen_addresses = '{{ postgres_listen_addresses|default("localhost") }}'
+    state: present
+  notify:
+    - restart postgres
+
+- name: update pg_hba.conf
+  lineinfile: 
+    dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+    insertafter: '^host[ ]{1,}all[ ]{1,}all[ ]{1,}[ ]{1,}127\.0\.0\.1\/32[ ]{1,}md5$'
+    line: 'host    all             all             192.168.0.0/16          md5'
+    state: present
+  notify:
+    - restart postgres

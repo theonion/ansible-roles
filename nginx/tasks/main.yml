@@ -26,3 +26,6 @@
 
 # Make sure nginx is running
 - service: name=nginx state=started
+
+# Make sure that nginx is in the www-data group
+- user: name=nginx groups=www-data
