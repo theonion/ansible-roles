@@ -15,5 +15,3 @@
         app_enabled: True
     }
   sudo: yes
-  vars:
-    uwsgi_install_method: pip
