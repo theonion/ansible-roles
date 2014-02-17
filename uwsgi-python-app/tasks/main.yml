@@ -25,19 +25,28 @@
 - authorized_key: user={{ appuser }} key="{{ item }}"
   with_items: authorized_keys
 
+# Make sure that the virtual env directory exists
+- file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data
+
+# Make sure that the virtualenv is created
+- command: virtualenv {{ virtualenv_dir }} creates={{ virtualenv_dir }}/bin/activate
+  sudo_user: "{{ appuser }}"
+
 # Install python packages
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   with_items: python_packages
+  when: python_requirements == None
+
+# Install python packages
+- pip: requirements="{{python_requirements}}" state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
+  when: python_requirements != None
 
 # Create virtualenv directory
 - file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data recurse=yes
 
 # Create a uwsgi configuration file
-- template: src=uwsgi.ini.j2 dest=/etc/uwsgi/apps-available/{{ app_name }}.ini owner={{ appuser }} group=www-data
-
-# Add the apps-enabled symlink
-- file: path=/etc/uwsgi/apps-enabled/{{ app_name }}.ini src=/etc/uwsgi/apps-available/{{ app_name }}.ini state=link owner={{ appuser }} group=www-data
+- template: src=uwsgi.ini.j2 dest=/etc/uwsgi-emperor/vassals/{{ app_name }}.ini owner={{ appuser }} group=www-data
   when: app_enabled
 
 # Make sure that uWSGI is started
-- service: name=uwsgi state=started
+- service: name=uwsgi-emperor state=started

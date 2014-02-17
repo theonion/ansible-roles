@@ -1,7 +1,7 @@
 ---
 - hosts: all
   roles:
-    - uwsgi
+    - uwsgi-emperor
   sudo: yes
   vars:
     uwsgi_install_method: pip

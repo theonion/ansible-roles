@@ -1,0 +1,7 @@
+---
+
+- name: Restart uwsgi-emperor
+  service: name=uwsgi-emperor state=restarted
+
+- name: Reload uwsgi-emperor
+  service: name=uwsgi-emperor state=reloaded

@@ -6,5 +6,6 @@ app_enabled: False
 appuser: "www-data"
 system_packages: []
 python_packages: []
+python_requirements: null
 authorized_keys: []
 env_vars: []

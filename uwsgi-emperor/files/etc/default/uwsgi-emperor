@@ -1,0 +1,13 @@
+# Defaults for uWSGI Emperor initscript
+# sourced by /etc/init.d/uwsgi-emperor
+
+# Run automatically at system startup?
+ENABLED=yes
+
+# At startup VERBOSE value is setted in 'no'. So when user invokes
+# uWSGI init.d script, no output is showed.
+# It could be unexpected behaviour, because it is common practice for
+# init.d script to ignore VERBOSE value.
+# Here VERBOSE is overriden to conform such the practice.
+VERBOSE=yes
+

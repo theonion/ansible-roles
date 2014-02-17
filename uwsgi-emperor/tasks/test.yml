@@ -1,0 +1,14 @@
+---
+
+# Test for directories that should exist
+- shell: test -d {{ item }}
+  with_items:
+    - /etc/uwsgi-emperor/vassals
+    - /var/log/uwsgi
+
+# Test for files that should exist
+- shell: test -e {{ item }}
+  with_items:
+    - /etc/init.d/uwsgi-emperor
+    - /etc/default/uwsgi-emperor
+    - /etc/uwsgi-emperor/emperor.ini

@@ -1,0 +1,16 @@
+---
+# This task installs uwsgi using Aptitude, which should work on Debian/Ubuntu systems.
+
+- name: apt | Make sure uwsgi is installed
+  apt: name={{ item }} state=latest update_cache=yes cache_valid_time=3600
+  with_items:
+    - uwsgi-emperor
+    - uwsgi-plugin-python
+  when: uwsgi_version == None
+
+- name: apt | Make sure uwsgi is installed
+  apt: name={{ item }}=={{ uwsgi_version }} state=latest update_cache=yes cache_valid_time=3600
+  with_items:
+    - uwsgi-emperor
+    - uwsgi-plugin-python
+  when: uwsgi_version != None

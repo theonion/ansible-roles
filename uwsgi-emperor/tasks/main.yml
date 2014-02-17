@@ -1,0 +1,14 @@
+---
+# This task installs uwsgi, then configures any apps that you have set up.
+- include: install-pip.yml
+  when: uwsgi_install_method == "pip"
+- include: install-apt.yml
+  when: uwsgi_install_method == "apt"
+- include: install-source.yml
+  when: uwsgi_install_method == "source"
+
+- name: Make sure uwsgi-emperor is running
+  service: name=uwsgi-emperor state=started
+
+- include: test.yml
+  when: run_tests

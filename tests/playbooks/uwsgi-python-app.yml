@@ -5,12 +5,10 @@
         app_name: "test-werkzeug",
         python_packages: ['werkzeug'],
         uwsgi: {
-            module: "werkzeug:testapp",
+            module: "werkzeug.testapp:test_app",
             http: ":8080",
             master: "true"
         },
         app_enabled: True
     }
   sudo: yes
-  vars:
-    uwsgi_install_method: pip

@@ -1,0 +1,21 @@
+---
+# This task installs uwsgi using pip, which is a good way to get a very recent version with python support.
+
+- name: pip | Make sure that pip is installed
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - python-dev
+    - python-pip
+
+- name: pip | Make sure that uwsgi is installed
+  pip: name=uwsgi state=latest
+  when: uwsgi_version == None
+
+- name: pip | Make sure that uwsgi is installed
+  pip: name=uwsgi version={{ uwsgi_version }}
+  when: uwsgi_version != None
+
+- name: Set the binary path
+  set_fact: uwsgi_binary="/usr/local/bin/uwsgi"
+
+- include: setup-initd.yml

@@ -1,0 +1,19 @@
+---
+# This task file sets up uwsgi in Emperor mode, with init.d scripts
+
+- name: Add the uwsgi default file
+  copy: dest=/etc/default/uwsgi-emperor src=etc/default/uwsgi-emperor owner=root group=www-data
+
+- name: Add the uwsgi configuration files
+  copy: dest=/etc/ src=etc/uwsgi-emperor owner=root group=www-data
+
+- name: Create the init.d script
+  template: src=etc/init.d/uwsgi-emperor.j2 dest=/etc/init.d/uwsgi-emperor owner=root group=www-data mode=655
+  notify:
+    - Reload uwsgi-emperor
+
+- name: Create the vassal directory
+  file: path=/etc/uwsgi-emperor/vassals state=directory owner=www-data group=www-data
+
+- name: Create the log directory
+  file: path=/var/log/uwsgi state=directory owner=www-data group=www-data

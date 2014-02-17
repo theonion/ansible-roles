@@ -1,0 +1,42 @@
+---
+# This task installs and configures uwsgi from source
+
+# source | Install build requirements
+- apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  with_items:
+    - build-essential
+    - python
+    - python-dev
+
+- name: source | Check if uwsgi is installed
+  command: which uwsgi
+  register: uwsgi_exists
+  ignore_errors: true
+
+- name: source | Download the source package
+  get_url: url=http://projects.unbit.it/downloads/uwsgi-{{ uwsgi_version }}.tar.gz dest=/tmp/uwsgi.tar.gz
+  when: uwsgi_exists|failed and uwsgi_version != None
+
+- name: source | Download the source package
+  get_url: url=http://projects.unbit.it/downloads/uwsgi-latest.tar.gz dest=/tmp/uwsgi.tar.gz
+  when: uwsgi_exists|failed and uwsgi_version == None
+
+- name: source | Create the extraction directory
+  file: path=/tmp/uwsgi state=directory
+
+- name: source | Unpack the source
+  command: tar xzf /tmp/uwsgi.tar.gz -C /tmp/uwsgi/ --strip-components=1
+  when: uwsgi_exists|failed
+
+- name: source | Build uwsgi
+  command: make chdir=/tmp/uwsgi
+  when: uwsgi_exists|failed
+
+- name: source | Move the binary
+  command: mv /tmp/uwsgi/uwsgi /usr/bin/uwsgi
+  when: uwsgi_exists|failed
+
+- name: Set the binary path
+  set_fact: uwsgi_binary="/usr/bin/uwsgi"
+
+- include: setup-initd.yml
