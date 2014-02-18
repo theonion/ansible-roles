@@ -2,15 +2,25 @@
 # Sets up and configures postgres
 
 - name: install postgres server
-  apt: pkg={{ item }} state=present update_cache=yes
-  with_items:
-    - postgresql-{{ postgres_version }}
-    - libpq-dev
-    - python-psycopg2
+  apt: pkg=postgresql version={{ postgres_version }} state=present update_cache=yes
+  when: postgres_version is defined
+
+- name: install postgres server
+  apt: pkg=postgresql state=latest update_cache=yes
+  when: postgres_version is not defined
+
+- name: get postgres config path for Debian
+  shell: ls -d -1 /etc/postgresql/** | sed -n '1p'
+  register: postgres_path
+  when: ansible_os_family == "Debian"
+
+- name: set postgres config path
+  when: postgres_path is defined
+  set_fact: ps_config_path={{ postgres_path.stdout }}/main
 
 - name: update postgresql.conf
   lineinfile: 
-    dest: /etc/postgresql/{{ postgres_version }}/main/postgresql.conf 
+    dest: "{{ ps_config_path }}/postgresql.conf"
     insertbefore: "^#listen_addresses ="
     line: listen_addresses = '{{ postgres_listen_addresses|default("localhost") }}'
     state: present
@@ -19,9 +29,12 @@
 
 - name: update pg_hba.conf
   lineinfile: 
-    dest: /etc/postgresql/{{ postgres_version }}/main/pg_hba.conf
+    dest: "{{ ps_config_path }}/pg_hba.conf"
     insertafter: '^host[ ]{1,}all[ ]{1,}all[ ]{1,}[ ]{1,}127\.0\.0\.1\/32[ ]{1,}md5$'
     line: 'host    all             all             192.168.0.0/16          md5'
     state: present
   notify:
     - restart postgres
+
+- include: test.yml
+  when: run_tests

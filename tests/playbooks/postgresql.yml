@@ -2,6 +2,5 @@
 - hosts: all
   roles:
     - postgresql
-  vars:
-    postgres_version: 9.1
+
   sudo: yes
