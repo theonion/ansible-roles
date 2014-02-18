@@ -2,7 +2,7 @@
 # Sets up and configures postgres
 
 - name: install postgres server
-  apt: pkg=postgresql version={{ postgres_version }} state=present update_cache=yes
+  apt: pkg=postgresql-{{ postgres_version }} state=present update_cache=yes
   when: postgres_version is defined
 
 - name: install postgres server
