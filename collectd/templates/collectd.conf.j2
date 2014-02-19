@@ -1,4 +1,4 @@
-Hostname "{{ collectd_hostname|default(ansible_fqdn) }}"
+Hostname "{{ collectd_hostname|default(ansible_fqdn, true) }}"
 
 {% for plugin in collectd_plugins %}
 {% if plugin is mapping %}
