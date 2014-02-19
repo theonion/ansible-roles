@@ -1,0 +1,14 @@
+---
+# Installing and configuring collectd.
+- name: install collectd via apt
+  apt: name=collectd state=latest update_cache=yes cache_valid_time=3600
+  tags: collectd
+
+- name: install collectd conf
+  template: src=collectd.conf.j2 dest=/etc/collectd/collectd.conf
+  tags: collectd
+  notify:
+    - restart collectd
+
+- name: ensure collectd is started
+  service: name=collectd state=started

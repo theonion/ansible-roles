@@ -1,0 +1,4 @@
+---
+# Handlers for collectd business
+- name: restart collectd
+  service: name=collectd state=restarted

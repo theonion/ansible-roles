@@ -1,0 +1,9 @@
+---
+# Defaults for collectd
+collectd_version: null
+collectd_hostname: null
+collectd_plugins: []
+collectd_includes: [
+    "/etc/collectd/filters.conf",
+    "/etc/collectd/thresholds.conf"
+]

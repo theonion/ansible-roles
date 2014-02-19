@@ -1,0 +1,35 @@
+Hostname "{{ collectd_hostname|default(ansible_fqdn) }}"
+
+{% for plugin in collectd_plugins %}
+{% if plugin is mapping %}
+{% for plugin_name,options in plugin.items() %}
+LoadPlugin {{ plugin_name }}
+<Plugin {{ plugin_name }}>
+{% for key,value in options.items() recursive %}
+{% if value is string %}
+    {{ key }} "{{ value }}"
+{% endif %}
+{% if value == True %}
+    {{ key }} true
+{% endif %}
+{% if value == False %}
+    {{ key }} false
+{% endif %}
+{% if value is mapping %}
+    <{{ key }}>
+    {{ loop(value.items()) }}
+    </{{ key }}>
+{% endif %}
+{% endfor %}
+</Plugin>
+{% endfor %}
+{% endif %}
+{% if plugin is string %}
+LoadPlugin {{ plugin }}
+{% endif%}
+
+{% endfor %}
+
+{% for include in collectd_includes %}
+Include "{{ include }}"
+{% endfor %}

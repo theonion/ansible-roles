@@ -1,0 +1,33 @@
+---
+- hosts: all
+  roles:
+    - { role: collectd,
+        collectd_hostname: "blergh",
+        collectd_plugins: [
+            "cpu",
+            "disk",
+            "load",
+            "memory",
+            "processes",
+            "swap",
+            "users",
+            {
+                "syslog": {
+                    "LogLevel": "info"
+                }
+            },
+            {
+                "write_graphite": {
+                    "Carbon": {
+                        "Host": "192.168.188.28",
+                        "Port": "2003",
+                        "Prefix": "collectd.avclub.",
+                        "StoreRates": False,
+                        "AlwaysAppendDS": False,
+                        "EscapeCharacter": "_"
+                    }
+                }
+            }
+        ]
+    }
+  sudo: yes
