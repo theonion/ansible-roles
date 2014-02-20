@@ -6,7 +6,7 @@
   vars:
     elasticsearch_version: "0.90.9"
     elasticsearch_settings:
-      network.host: "127.0.0.1"
+      network.host: "192.168.22.234"
       http.port: "9300"
     elasticsearch_plugins:
       - elasticsearch/elasticsearch-river-twitter/1.4.0
