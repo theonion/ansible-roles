@@ -1,0 +1,11 @@
+---
+- hosts: all
+  roles:
+    - {
+        role: pgbouncer,
+        pgbouncer_enabled: true,
+        pgbouncer_settings: {
+            auth_type: any
+        }
+    }
+  sudo: yes

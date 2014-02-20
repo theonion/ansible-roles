@@ -1,0 +1,4 @@
+---
+pgbouncer_version: null
+pgbouncer_enabled: false
+pgbouncer_settings: {}
