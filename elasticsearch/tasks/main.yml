@@ -1,36 +1,36 @@
 ---
 
-# Install PyCurl, and Java
-- apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+- name: Install PyCurl, and Java
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
   with_items:
     - python-pycurl
     - openjdk-7-jre
 
-# Add the apt key for the elasticsearch repo
-- apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
+- name: Add the apt key for the elasticsearch repo
+  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
 
-# Add the elasticsearch 0.90.x apt repo
-- apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/0.90/debian stable main" state=present
+- name: Add the elasticsearch 0.90.x apt repo
+  apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/0.90/debian stable main" state=present
   when: elasticsearch_version.startswith("0.90.")
 
-# Add the elasticsearch 1.x apt repo
-- apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/1.0/debian stable main" state=present
+- name: Add the elasticsearch 1.x apt repo
+  apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/1.0/debian stable main" state=present
   when: elasticsearch_version.startswith("1.")
 
-# Update repositories cache and install elasticsearch
-- apt: name=elasticsearch={{ elasticsearch_version }} update_cache=yes
+- name: Update repositories cache and install elasticsearch
+  apt: name=elasticsearch={{ elasticsearch_version }} update_cache=yes
 
-# Install plugins
-- command: /usr/share/elasticsearch/bin/plugin -install {{ item }}
+- name: Install plugins
+  command: /usr/share/elasticsearch/bin/plugin -install {{ item }}
   with_items: elasticsearch_plugins
 
-# Update the elasticsearch settings
-- lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml line='{{ item[0] }}: {{ item[1] }}' regexp='(# )?{{ item[0] }}:' state=present"
+- name: Update the elasticsearch settings
+  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml line='{{ item[0] }}: {{ item[1] }}' regexp='(# )?{{ item[0] }}:' state=present"
   with_items: elasticsearch_settings.items()
   notify: Restart elasticsearch
 
-# Make sure that elasticsearch is started
-- service: name=elasticsearch state=started
+- name: Make sure that elasticsearch is started
+  service: name=elasticsearch state=started
 
 - include: test.yml
   when: run_tests
