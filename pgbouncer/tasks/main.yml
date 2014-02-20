@@ -1,0 +1,23 @@
+---
+
+- name: install pgbouncer
+  apt: name=pgbouncer state=latest update_cache=yes cache_valid_time=3600
+  when: pgbouncer_version == None
+
+- name: install pgbouncer
+  apt: name=pgbouncer state=present version={{pgbouncer_version}} update_cache=yes cache_valid_time=3600
+  when: pgbouncer_version != None
+
+- name: update pgbouncer settings
+  ini_file: dest=/etc/pgbouncer/pgbouncer.ini section=pgbouncer option={{ item }} value="{{ pgbouncer_settings.get(item)|default(default_pgbouncer_settings[item], true) }}"
+  with_items: default_pgbouncer_settings.keys()
+
+- name: Enable pgbouncer
+  lineinfile: dest=/etc/default/pgbouncer line="START=1" regexp="^START=[01]"
+  when: pgbouncer_enabled
+  notify: start pgbouncer
+
+- name: Disable pgbouncer
+  lineinfile: dest=/etc/default/pgbouncer line="START=1" regexp="^START=[01]"
+  when: pgbouncer_enabled
+  notify: stop pgbouncer

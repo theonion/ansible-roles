@@ -1,0 +1,8 @@
+---
+- hosts: all
+  roles:
+    - {
+        "role": "memcached",
+        "memcached_cache_size": "3072"
+    }
+  sudo: yes
