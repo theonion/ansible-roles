@@ -1,0 +1,8 @@
+---
+- hosts: all
+  pre_tasks: 
+  - name: Making sure g++ and make are there
+    apt: pkg=build-essential state=latest update_cache=yes
+  roles:
+    - nodejs
+  sudo: yes

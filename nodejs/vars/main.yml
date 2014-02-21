@@ -1,0 +1,6 @@
+---
+# Variables for node installation
+node_version: "0.10.26"
+node_prefix: "node-v{{ node_version }}"
+node_tarball: "{{ node_prefix }}.tar.gz"
+node_path: "/usr/local"
