@@ -18,11 +18,20 @@
 - user: name={{ appuser }} shell=/bin/bash createhome=yes group=www-data
   when: appuser == "www-data"
 
+# Create the app user (if necessary)
+- user: name={{ app_name }} shell=/bin/bash createhome=yes group=www-data
+
 # Make sure that the source directory exists
 - file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
 
 # Set the authorized_keys
 - authorized_key: user={{ appuser }} key="{{ item }}"
+  with_items: authorized_keys
+
+- name: make sure .ssh folder exists for app
+  file: path=/home/{{ app_name }}/.ssh mode=700 state=directory owner={{ app_name }}
+
+- authorized_key: user={{ app_name }} key="{{ item }}"
   with_items: authorized_keys
 
 # Make sure that the virtual env directory exists
@@ -31,6 +40,12 @@
 # Make sure that the virtualenv is created
 - command: virtualenv {{ virtualenv_dir }} creates={{ virtualenv_dir }}/bin/activate
   sudo_user: "{{ appuser }}"
+
+- name: adding venv source to .profile 
+  lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='source .*/bin/activate' line='cd {{ source_dir }} && source /var/venvs/{{ app_name }}/bin/activate'
+
+- name: adding DJANGO_SETTINGS_MODULE to .profile
+  lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='DJANGO_SETTINGS_MODULE=*' line='export DJANGO_SETTINGS_MODULE={{ env_vars.DJANGO_SETTINGS_MODULE }}'
 
 # Install python packages
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
