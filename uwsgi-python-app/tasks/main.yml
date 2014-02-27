@@ -45,7 +45,7 @@
   lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='source .*/bin/activate' line='cd {{ source_dir }} && source /var/venvs/{{ app_name }}/bin/activate'
 
 - name: adding DJANGO_SETTINGS_MODULE to .profile
-  lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='DJANGO_SETTINGS_MODULE=*' line='export DJANGO_SETTINGS_MODULE={{ env_vars.DJANGO_SETTINGS_MODULE }}'
+  lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='DJANGO_SETTINGS_MODULE=*' line='export {{ env_vars[0] }}'
 
 # Install python packages
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
