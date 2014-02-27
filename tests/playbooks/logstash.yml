@@ -1,0 +1,22 @@
+
+---
+- hosts: all
+  roles:
+    - elasticsearch
+    - {
+        role: logstash,
+        logstash_enabled: True,
+        logstash_inputs: [
+            udp: {
+                host: "127.0.0.1",
+                port: 8999
+            }
+        ],
+        logstash_outputs: [
+            elasticsearch: {
+                host: "127.0.0.1",
+                port: "9200"
+            }
+        ]
+    }
+  sudo: yes

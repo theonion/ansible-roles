@@ -1,0 +1,7 @@
+---
+# Variables for the logstash role
+logstash_version: null
+logstash_enabled: false
+logstash_inputs: []
+logstash_outputs: []
+logstash_filters: []

@@ -1,0 +1,15 @@
+input {
+    {{ item.keys()[0] }} {
+        {% for key, value in item.values()[0].items() recursive %}
+        {% if value is string %}
+        {{ key }} => "{{ value }}"
+        {% elif value is number %}
+        {{ key }} => {{ value }}
+        {% elif value is mapping %}
+        {{ key }} => {
+            {{ loop(value.items()) }}
+        }
+        {% endif %}
+        {% endfor %}
+    }
+}

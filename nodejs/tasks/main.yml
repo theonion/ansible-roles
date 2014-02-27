@@ -1,27 +1,29 @@
----
-# Installs and configures nodejs
+- name: Make sure that apt requirements are present update_cache=yes cache_valid_time=3600
+  apt: name={{ item }} state=present
+  with_items:
+    - python-apt
+    - python-pycurl
 
-- name: Node.js | Checking installed version of node.js
-  action: shell /usr/bin/test "$(node -v 2> /dev/null)" = v{{ node_version }}
-  register: wanted_version_installed
+- name: Add the debian wheezy-backports repo
+  apt_repository: repo='deb http://ftp.us.debian.org/debian wheezy-backports main' state=present
+  when: ansible_distribution == "Debian"  # Should make sure this is wheezy at some point, but for now, fuck it.
+
+- name: Install nodejs
+  apt: name=nodejs state=present default_release=wheezy-backports
+
+# So, it turns out that debian is fucking stupid, and installs node at /usr/bin/nodejs, WHICH IS NOT THE RIGHT BINARY NAME
+- name: Symlink the node BINARY
+  file: state=link src=/usr/bin/nodejs path=/usr/bin/node
+
+- name: Check if npm is installed
+  command: which npm
+  register: npm_installed
   ignore_errors: True
 
-- name: Node.js | Fetching node.js source
-  action: get_url url=http://nodejs.org/dist/v{{ node_version }}/{{ node_tarball }} dest=/tmp/
-  when: wanted_version_installed|failed
+- name: Get the npm install script
+  get_url: dest=/tmp/npm_install.sh url=https://www.npmjs.org/install.sh sha256sum=5c493b8be14d639f1ae76539cd8265777e69fa5ffd920b212cecee63c72f3564
+  when: npm_installed|failed
 
-- name: Node.js | Unpack node.js tarball
-  command: tar zxf {{ node_tarball }} chdir=/tmp
-  when: wanted_version_installed|failed
-
-- name: Node.js | Configure
-  shell: /usr/bin/python ./configure --prefix={{ node_path }} chdir=/tmp/{{ node_prefix }}
-  when: wanted_version_installed|failed
-
-- name: Node.js | Make
-  shell: /usr/bin/make chdir=/tmp/{{ node_prefix }}/
-  when: wanted_version_installed|failed
-
-- name: Node.js | Make install
-  shell: /usr/bin/make install chdir=/tmp/{{ node_prefix }}/
-  when: wanted_version_installed|failed
+- name: Install npm
+  raw: sh /tmp/npm_install.sh
+  when: npm_installed|failed
