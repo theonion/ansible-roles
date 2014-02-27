@@ -26,3 +26,4 @@
 
 - name: Install npm
   raw: sh /tmp/npm_install.sh
+  when: npm_installed|failed
