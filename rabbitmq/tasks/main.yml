@@ -1,0 +1,21 @@
+---
+
+- name: Make sure that apt requirements are present update_cache=yes cache_valid_time=3600
+  apt: name={{ item }} state=present
+  with_items:
+    - python-apt
+    - python-pycurl
+
+- name: Add the RabbitMQ apt key
+  apt_key: url=http://www.rabbitmq.com/rabbitmq-signing-key-public.asc state=present
+
+- name: Add the RabbitMQ apt repo
+  apt_repository: repo='deb http://www.rabbitmq.com/debian/ testing main' state=present update_cache=yes
+
+- name: Install RabbitMQ
+  apt: name=rabbitmq-server={{ rabbitmq_version }} state=present
+  when: rabbitmq_version != None
+
+- name: Install RabbitMQ
+  apt: name=rabbitmq-server state=present
+  when: rabbitmq_version == None
