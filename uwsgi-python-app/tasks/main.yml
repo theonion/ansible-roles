@@ -34,12 +34,11 @@
 - authorized_key: user={{ app_name }} key="{{ item }}"
   with_items: authorized_keys
 
-# Make sure that the virtual env directory exists
-- file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data
+- name: Make sure that the virtual env directory exists
+  file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data
 
-# Make sure that the virtualenv is created
-- command: virtualenv {{ virtualenv_dir }} creates={{ virtualenv_dir }}/bin/activate
-  sudo_user: "{{ appuser }}"
+- name: Make sure that the virtualenv is created
+  command: su {{ appuser }} -c "virtualenv {{ virtualenv_dir }}" creates={{ virtualenv_dir }}/bin/activate
 
 - name: adding venv source to .profile 
   lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='source .*/bin/activate' line='cd {{ source_dir }} && source /var/venvs/{{ app_name }}/bin/activate'
