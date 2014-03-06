@@ -16,13 +16,17 @@
   when: ansible_distribution == "Ubuntu"
   register: nginx_repository
 
-# Install the package with a cache update
-- apt: name=nginx={{ nginx_version }} state=present update_cache=yes
+- apt: update_cache=yes
   when: nginx_repository|changed
 
-# Install the package without a cache update
+# Install the package with a specific version
 - apt: name=nginx={{ nginx_version }} state=present
-  when: not nginx_repository|changed
+  when: nginx_version != None
+
+# Install the package
+- apt: name=nginx state=present update_cache=yes
+  when: nginx_version == None
+
 
 # Make sure nginx is running
 - service: name=nginx state=started
