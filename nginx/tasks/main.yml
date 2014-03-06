@@ -12,12 +12,8 @@
   register: nginx_repository
 
 # Add the nginx apt repo for ubuntu
-- apt_repository: repo="deb http://nginx.org/packages/ubuntu/ {{ansible_distribution_release}} nginx" state=present
+- apt_repository: repo="deb http://nginx.org/packages/ubuntu/ {{ansible_distribution_release}} nginx" state=present update_cache=yes
   when: ansible_distribution == "Ubuntu"
-  register: nginx_repository
-
-- apt: update_cache=yes
-  when: nginx_repository|changed
 
 # Install the package with a specific version
 - apt: name=nginx={{ nginx_version }} state=present
@@ -26,7 +22,6 @@
 # Install the package
 - apt: name=nginx state=present update_cache=yes
   when: nginx_version == None
-
 
 # Make sure nginx is running
 - service: name=nginx state=started
