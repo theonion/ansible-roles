@@ -1,18 +1,16 @@
 server {
     listen 80;
-    {% if betty_server_name is defined %}server_name {{betty_server_name}};{% endif %}
+    {% if betty_server_name %}server_name {{betty_server_name}};{% endif %}
 
     root {{ betty_image_root }};
     client_max_body_size 10M;
 
     location @betty {
-        {% if betty_server_path not in ("/", None) %}rewrite  ^{{ betty_server_path }}(.*)$ /$1 break;{% endif %}
         include uwsgi_params;
         uwsgi_pass 127.0.0.1:8080;
     }
 
-    location {{ betty_server_path }} {
-        {% if betty_server_path not in ("/", None) %}rewrite  ^{{ betty_server_path }}(.*)$ /$1 break;{% endif %}
+    location / {
         try_files $uri @betty;
     }
 }

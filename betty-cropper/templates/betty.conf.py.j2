@@ -1,0 +1,16 @@
+{% if betty_debug %}DEBUG = True{% endif %}
+
+DATABASES = {
+    "default": {
+        "NAME": "{{ betty_database.NAME }}",
+        "ENGINE": "{{ betty_database.ENGINE }}",
+        {% if "USER" in betty_database %}"USER": "{{ betty_database.USER }}",{% endif %}
+        {% if "PASSWORD" in betty_database %}"PASSWORD": "{{ betty_database.PASSWORD }}",{% endif %}
+        {% if "HOST" in betty_database %}"HOST": "{{ betty_database.HOST }}",{% endif %}
+        {% if "PORT" in betty_database %}"PORT": "{{ betty_database.PORT }}"{% endif %}
+    }
+}
+
+BETTY_IMAGE_ROOT = "{{ betty_image_root }}"
+BETTY_IMAGE_URL = "{{ betty_image_url }}"
+BETTY_PLACEHOLDER = {{ betty_placeholder }}

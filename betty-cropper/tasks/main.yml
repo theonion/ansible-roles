@@ -4,13 +4,7 @@
 - file: path=/etc/betty-cropper state=directory owner=www-data group=www-data
 
 # Create the config file
-- template: dest=/etc/betty-cropper/settings.py src=settings.py.j2 owner=www-data group=www-data mode=760
-
-# Add the fonts
-- copy: dest=/etc/betty-cropper/{{ item }} src={{ item }} owner=www-datagroup=www-data
-  with_items:
-    - Lato-Hai.ttf
-    - OpenSans-Semibold.ttf
+- template: dest=/www/betty-cropper/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
 
 # Make sure the root directory exists
 - file: path={{ betty_image_root }} state=directory owner=www-data group=www-data
@@ -20,4 +14,4 @@
   notify: Restart nginx
 
 # Make sure that uwsgi has beens started.
-- service: name=uwsgi state=started
+- service: name=uwsgi-emperor state=started
