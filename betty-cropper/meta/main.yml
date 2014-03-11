@@ -6,8 +6,11 @@ dependencies:
         python_packages: ["https://github.com/theonion/betty-cropper/archive/django.zip", "psycopg2"],
         system_packages: ["libmagickwand5", "libpq-dev", "python-dev"],
         uwsgi: {
-            module: "betty:app",
+            module: "betty.wsgi",
             socket: "127.0.0.1:8080",
         },
-        app_enabled: True
+        app_enabled: True,
+        env_vars: [
+            "BETTY_CONF=betty.conf.py"
+        ],
     }
