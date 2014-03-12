@@ -23,6 +23,12 @@
 - apt: name=nginx state=present update_cache=yes
   when: nginx_version == None
 
+- name: remove default sites from nginx
+  file: path=/etc/nginx/conf.d/{{ item }} state=absent
+  with_items:
+    - default.conf
+    - example_ssl.conf
+
 # Make sure nginx is running
 - service: name=nginx state=started
 
