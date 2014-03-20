@@ -3,7 +3,7 @@ dependencies:
     - { role: nginx }
     - { role: uwsgi-python-app,
         app_name: "betty-cropper",
-        python_packages: ["betty-cropper", "psycopg2"],
+        python_packages: ["betty-cropper==0.1a", "psycopg2"],
         system_packages: ["libmagickwand5", "libpq-dev", "python-dev"],
         uwsgi: {
             module: "betty.wsgi",
