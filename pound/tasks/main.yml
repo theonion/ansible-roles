@@ -1,0 +1,40 @@
+---
+- name: install pound
+  apt: name=pound state=present update_cache=true
+  notify: start pound
+  tags:
+    - install
+
+- name: create run directory
+  file: dest=/var/run/pound
+    state=directory
+    owner={{ pound_user }}
+    group={{ pound_group }}
+  tags:
+    - install
+    - config
+
+- name: copy pound ssl cert
+  copy: src={{ pound_ssl_cert.src }}
+    dest={{ pound_ssl_cert.dest }}
+    owner={{ pound_user }}
+    group={{ pound_group }}
+    mode=0400
+  when: pound_ssl_cert.src
+  ignore_errors: True
+  tags:
+    - install
+    - config
+
+- name: set pound environment startup sentinel
+  lineinfile: dest=/etc/default/pound regexp="startup=0" line="startup=1"
+  tags:
+    - config
+
+- name: create pound configuration
+  template: src=pound.cfg.j2
+    dest=/etc/pound/pound.cfg
+  notify: restart pound
+  tags:
+    - install
+    - config

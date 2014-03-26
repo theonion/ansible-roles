@@ -7,7 +7,7 @@ dependencies:
         system_packages: ["libmagickwand5", "libpq-dev", "python-dev"],
         uwsgi: {
             module: "betty.wsgi",
-            socket: "127.0.0.1:9069",
+            socket: "127.0.0.1:8080",
         },
         app_enabled: True,
         env_vars: [

@@ -1,0 +1,6 @@
+---
+- name: start pound
+  service: name=pound state=started
+
+- name: restart pound
+  service: name=pound state=restarted

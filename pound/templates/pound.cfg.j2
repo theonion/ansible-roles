@@ -1,0 +1,58 @@
+######################################################################
+## global options:
+
+User		"{{ pound_user }}"
+Group		"{{ pound_group }}"
+
+## Logging: (goes to syslog by default)
+##	0	no logging
+##	1	normal
+##	2	extended
+##	3	Apache-style (common log format)
+LogLevel	1
+
+## check backend every X secs:
+Alive		30
+
+## use hardware-accelleration card supported by openssl(1):
+#SSLEngine	"<hw>"
+
+# poundctl control socket
+Control "{{ pound_run_path }}poundctl.socket"
+
+{% if pound_listen_http %}
+ListenHTTP
+	Address	{{ pound_listen_http.addr }}
+	Port 	{{ pound_listen_http.port }}
+
+	## allow PUT and DELETE also (by default only GET, POST and HEAD)?:
+	xHTTP		0
+	HeadRemove "X-Forwarded-Ssl"
+
+	Service
+		BackEnd
+			Address	{{ pound_listen_http.backend_addr }}
+			Port	{{ pound_listen_http.backend_port }}
+		End
+	End
+End
+{% endif %}
+
+{% if pound_listen_https %}
+ListenHTTPS
+	Cert 	"{{ pound_ssl_cert.dest }}"
+	Address	{{ pound_listen_https.addr }}
+	Port	{{ pound_listen_https.port }}
+
+	## allow PUT and DELETE also (by default only GET, POST and HEAD)?:
+	xHTTP		0
+	AddHeader "X-Forwarded-Ssl: on"
+
+	Service
+		BackEnd
+			Address	{{ pound_listen_https.backend_addr }}
+			Port	{{ pound_listen_https.backend_port }}
+		End
+	End
+End
+{% endif %}

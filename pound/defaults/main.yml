@@ -1,0 +1,22 @@
+---
+pound_user: www-data
+pound_group: www-data
+pound_run_path: /var/run/pound/
+pound_listen_http: {
+    # Example ListenHTTP config:
+    # addr: 127.0.0.1,
+    # port: 80,
+    # backend_addr: 127.0.0.1,
+    # backend_port: 8088
+}
+pound_ssl_cert: {
+    # src: your_cert.crt,
+    # dest: /path/to/your_cert.crt
+}
+pound_listen_https: {
+    # addr: 127.0.0.1,
+    # port: 443,
+    # backend_addr: 127.0.0.1,
+    # backend_port: 8089,
+    # cert: "{{ pound_ssl_cert.dest }}"
+}
