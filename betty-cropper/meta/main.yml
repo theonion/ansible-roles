@@ -2,12 +2,12 @@
 dependencies:
     - { role: nginx }
     - { role: uwsgi-python-app,
-        app_name: "betty-cropper",
-        python_packages: ["betty-cropper", "psycopg2"],
+        app_name: "{{ betty_app_name }}",
+        python_packages: ["betty-cropper==0.1.2", "psycopg2"],
         system_packages: ["libmagickwand5", "libpq-dev", "python-dev"],
         uwsgi: {
             module: "betty.wsgi",
-            socket: "127.0.0.1:8080",
+            socket: "127.0.0.1:9069",
         },
         app_enabled: True,
         env_vars: [

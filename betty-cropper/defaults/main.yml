@@ -8,3 +8,4 @@ betty_image_root: "/var/betty-cropper"
 betty_image_url: "/"
 betty_server_name: null
 betty_placeholder: true
+betty_app_name: "betty-cropper"

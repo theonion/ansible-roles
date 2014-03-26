@@ -1,4 +1,4 @@
-{% if betty_debug %}DEBUG = True{% endif %}
+DEBUG = {% if betty_debug %}True{% else %}False{% endif %}
 
 DATABASES = {
     "default": {
@@ -11,6 +11,7 @@ DATABASES = {
     }
 }
 
+ALLOWED_HOSTS = ["*"]
 BETTY_IMAGE_ROOT = "{{ betty_image_root }}"
 BETTY_IMAGE_URL = "{{ betty_image_url }}"
 BETTY_PLACEHOLDER = {{ betty_placeholder }}

@@ -4,14 +4,14 @@
 - file: path=/etc/betty-cropper state=directory owner=www-data group=www-data
 
 # Create the config file
-- template: dest=/www/betty-cropper/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
+- template: dest=/www/{{ betty_app_name }}/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
 
 # Make sure the root directory exists
-- file: path={{ betty_image_root }} state=directory owner=www-data group=www-data
+# - file: path={{ betty_image_root }} state=directory owner=www-data group=www-data
 
 # Add the nginx config
-- template: dest=/etc/nginx/conf.d/betty-cropper.conf src=betty-cropper.conf.j2
-  notify: Restart nginx
+#- template: dest=/etc/nginx/conf.d/betty-cropper.conf src=betty-cropper.conf.j2
+#  notify: Restart nginx
 
 # Make sure that uwsgi has beens started.
 - service: name=uwsgi-emperor state=started
