@@ -24,14 +24,12 @@
 # Make sure that the source directory exists
 - file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
 
-# Set the authorized_keys
-- authorized_key: user={{ appuser }} key="{{ item }}"
-  with_items: authorized_keys
 
 - name: make sure .ssh folder exists for app
   file: path=/home/{{ app_name }}/.ssh mode=700 state=directory owner={{ app_name }}
 
-- authorized_key: user={{ app_name }} key="{{ item }}"
+- name: add the authorized keys
+  authorized_key: user={{ app_name }} key="{{ item }}"
   with_items: authorized_keys
 
 - name: Make sure that the virtual env directory exists
