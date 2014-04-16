@@ -1,0 +1,25 @@
+---
+- name: System packages
+  apt: pkg=python-pip state=installed update_cache=yes
+
+- name: Set up Bonjour/Zeroconf (avahi-daemon)
+  apt: pkg=avahi-daemon state=installed update_cache=yes
+
+- name: Set up Python avahi support
+  apt: pkg=python-avahi state=installed update_cache=yes
+
+- name: Install avahi-aliases
+  copy: src=avahi-aliases.py dest=/usr/local/bin/avahi-aliases mode=755
+
+- name: Init file for avahi-aliases
+  copy: src=avahi-aliases.init dest=/etc/init.d/avahi-aliases mode=655
+
+- name: Copy aliases file
+  template: src=default.aliases.j2 dest=/etc/avahi/aliases.d/default
+  notify:
+    - restart avahi-aliases
+
+- name: Advertise site with Zeroconf
+  template: src=httpd.service.j2 dest=/etc/avahi/services/httpd.service mode=0644 
+  notify:
+    - restart avahi

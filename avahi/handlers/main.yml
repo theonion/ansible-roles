@@ -1,0 +1,8 @@
+---
+
+- name: restart avahi
+  service: name=avahi-daemon state=restarted
+
+- name: restart avahi-aliases
+  service: name=avahi-aliases state=restarted
+
