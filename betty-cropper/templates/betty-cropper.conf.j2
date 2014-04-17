@@ -7,7 +7,7 @@ server {
 
     location @betty {
         include uwsgi_params;
-        uwsgi_pass 127.0.0.1:9069;
+        uwsgi_pass 127.0.0.1:8080;
     }
 
     location / {

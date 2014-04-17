@@ -14,6 +14,9 @@
 - name: Init file for avahi-aliases
   copy: src=avahi-aliases.init dest=/etc/init.d/avahi-aliases mode=655
 
+- name: Init defaults
+  file: path=/etc/avahi/aliases.d state=directory
+
 - name: Copy aliases file
   template: src=default.aliases.j2 dest=/etc/avahi/aliases.d/default
   notify:
