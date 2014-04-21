@@ -9,4 +9,6 @@ betty_image_url: "/"
 betty_server_name: null
 betty_placeholder: true
 betty_app_name: "betty-cropper"
+app_name: "betty-cropper"
 betty_widths: null
+betty_version: null

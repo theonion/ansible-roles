@@ -2,6 +2,12 @@
 # Create the config file
 - template: dest=/www/{{ betty_app_name }}/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
 
+- pip: state=latest name='betty-cropper[server]' virtualenv={{ virtualenv_dir }}
+  when: betty_version == None
+
+- pip: state=installed name='betty-cropper[server]=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
+  when: betty_version != None
+
 # Make sure the root directory exists
 - file: path={{ betty_image_root }} state=directory owner=www-data group=www-data
 
