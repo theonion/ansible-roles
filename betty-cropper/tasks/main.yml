@@ -4,9 +4,11 @@
 
 - pip: state=latest name='betty-cropper[server]' virtualenv={{ virtualenv_dir }}
   when: betty_version == None
+  notify: Restart betty cropper
 
 - pip: state=installed name='betty-cropper[server]=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
   when: betty_version != None
+  notify: Restart betty cropper
 
 # Make sure the root directory exists
 - file: path={{ betty_image_root }} state=directory owner=www-data group=www-data
