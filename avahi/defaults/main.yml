@@ -3,3 +3,4 @@
 # Advertised Bonjour name
 # '%h' is a placeholder for hostname
 avahi_banner: "%h (Vagrant)"
+avahi_aliases: []
