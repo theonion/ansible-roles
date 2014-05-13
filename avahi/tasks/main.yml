@@ -26,3 +26,6 @@
   template: src=httpd.service.j2 dest=/etc/avahi/services/httpd.service mode=0644 
   notify:
     - restart avahi
+
+- name: Make sure avahi-aliases is started
+  service: name=avahi-aliases state=started enabled=yes

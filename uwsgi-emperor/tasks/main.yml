@@ -7,8 +7,8 @@
 - include: install-source.yml
   when: uwsgi_install_method == "source"
 
-- name: Make sure uwsgi-emperor is running
-  service: name=uwsgi-emperor state=started
+- name: Make sure uwsgi-emperor is running (and runs on boot)
+  service: name=uwsgi-emperor state=started enabled=yes
 
 - include: test.yml
   when: run_tests
