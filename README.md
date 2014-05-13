@@ -4,14 +4,14 @@ This repo is an attempt to make some reusable, well tested ansible roles for ubu
 
 - [x] uwsgi
 - [x] uwsgi-python-app
-- [ ] collectd
-- [ ] nginx
-- [ ] memcached
+- [x] collectd
+- [x] nginx
+- [x] memcached
 - [x] elasticsearch
 - [ ] postgresql
 - [ ] redis
-- [ ] rabbitmq
-- [ ] nodejs
+- [x] rabbitmq
+- [x] nodejs
 
 # Testing
 
