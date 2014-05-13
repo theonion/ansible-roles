@@ -8,7 +8,7 @@
   copy: dest=/etc/ src=etc/uwsgi-emperor owner=root group=www-data
 
 - name: Create the init.d script
-  template: src=etc/init.d/uwsgi-emperor.j2 dest=/etc/init.d/uwsgi-emperor owner=root group=www-data mode=655
+  template: src=etc/init.d/uwsgi-emperor.j2 dest=/etc/init.d/uwsgi-emperor owner=root group=www-data mode=755
   notify:
     - Reload uwsgi-emperor
 

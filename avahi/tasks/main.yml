@@ -12,7 +12,7 @@
   copy: src=avahi-aliases.py dest=/usr/local/bin/avahi-aliases mode=755
 
 - name: Init file for avahi-aliases
-  copy: src=avahi-aliases.init dest=/etc/init.d/avahi-aliases mode=655
+  copy: src=avahi-aliases.init dest=/etc/init.d/avahi-aliases mode=755
 
 - name: Init defaults
   file: path=/etc/avahi/aliases.d state=directory
