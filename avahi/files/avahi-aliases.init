@@ -15,7 +15,7 @@ NAME=avahi-aliases
 DAEMON=$(which $NAME)
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
-USER=avahi
+USERNAME=avahi
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -36,9 +36,9 @@ do_start()
     #   0 if daemon has been started
     #   1 if daemon was already running
     #   2 if daemon could not be started
-    start-stop-daemon --start --pidfile $PIDFILE --make-pidfile \
-            --exec $DAEMON --background --chuid $USER --test > /dev/null || return 1
-    start-stop-daemon --start --pidfile $PIDFILE --make-pidfile \
+    start-stop-daemon --chuid $USERNAME --start --pidfile $PIDFILE --make-pidfile \
+            --exec $DAEMON --background --test > /dev/null || return 1
+    start-stop-daemon --chuid $USERNAME --start --pidfile $PIDFILE --make-pidfile \
             --exec $DAEMON --background || return 2
 }
 
@@ -49,19 +49,9 @@ do_stop()
         #   1 if daemon was already stopped
         #   2 if daemon could not be stopped
         #   other if a failure occurred
-        start-stop-daemon --stop --quiet --chuid $USER --retry=TERM/10/KILL/5 --pidfile $PIDFILE --exec $DAEMON 
+        start-stop-daemon --stop --pidfile $PIDFILE
         RETVAL="$?"
         [ "$RETVAL" = 2 ] && return 2
-
-        # Wait for children to finish too if this is a daemon that forks
-        # and if the daemon is only ever run from this initscript.
-        # If the above conditions are not satisfied then add some other code
-        # that waits for the process to drop all resources that could be
-        # needed by services started subsequently.  A last resort is to
-        # sleep for some time.
-
-        start-stop-daemon --stop --quiet --chuid $USER --oknodo --retry=0/30/KILL/5 --exec $DAEMON
-        [ "$?" = 2 ] && return 2
 
         # Many daemons don't delete their pidfiles when they exit.
         rm -f $PIDFILE
@@ -106,7 +96,7 @@ case "$1" in
         esac
         ;;
   status)
-        status_of_proc $DAEMON $NAME && exit 0 || exit $?
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
         ;;
   *)
         echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
