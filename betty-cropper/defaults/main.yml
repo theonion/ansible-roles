@@ -11,4 +11,5 @@ betty_placeholder: true
 betty_app_name: "betty-cropper"
 app_name: "betty-cropper"
 betty_widths: null
+betty_ratios: null
 betty_version: null
