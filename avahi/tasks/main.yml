@@ -5,6 +5,11 @@
 - name: Set up Bonjour/Zeroconf (avahi-daemon)
   apt: pkg=avahi-daemon state=installed update_cache=yes
 
+- name: install avahi config file
+  copy: src=avahi-daemon.conf dest=/etc/avahi/avahi-daemon.conf
+  notify:
+    - restart avahi
+
 - name: Set up Python avahi support
   apt: pkg=python-avahi state=installed update_cache=yes
 
