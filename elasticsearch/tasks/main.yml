@@ -22,6 +22,7 @@
 
 - name: Install plugins
   command: /usr/share/elasticsearch/bin/plugin -install {{ item }}
+  ignore_errors: yes
   with_items: elasticsearch_plugins
 
 - name: Update the elasticsearch settings

@@ -1,12 +1,12 @@
 ---
 # Create the config file
-- template: dest=/www/{{ betty_app_name }}/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
+# - template: dest=/www/{{ betty_app_name }}/betty.conf.py src=betty.conf.py.j2 owner=www-data group=www-data mode=760
 
-- pip: state=latest name='betty-cropper[server]' virtualenv={{ virtualenv_dir }}
+- pip: state=latest name='betty-cropper' virtualenv={{ virtualenv_dir }}
   when: betty_version == None
   notify: Restart betty cropper
 
-- pip: state=installed name='betty-cropper[server]=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
+- pip: state=installed name='betty-cropper=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
   when: betty_version != None
   notify: Restart betty cropper
 
