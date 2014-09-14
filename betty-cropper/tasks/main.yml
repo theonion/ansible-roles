@@ -6,7 +6,7 @@
   when: betty_version == None
   notify: Restart betty cropper
 
-- pip: state=installed name='betty-cropper=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
+- pip: state=present name='betty-cropper=={{ betty_version }}' virtualenv={{ virtualenv_dir }}
   when: betty_version != None
   notify: Restart betty cropper
 
