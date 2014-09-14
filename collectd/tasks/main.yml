@@ -12,3 +12,4 @@
 
 - name: ensure collectd is started
   service: name=collectd state=started
+  tags: collectd
