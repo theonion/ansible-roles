@@ -6,7 +6,7 @@
     - install
 
 - name: create run directory
-  file: dest=/var/run/pound
+  file: dest={{ pound_run_path }}
     state=directory
     owner={{ pound_user }}
     group={{ pound_group }}
@@ -14,13 +14,14 @@
     - install
     - config
 
-- name: copy pound ssl cert
-  copy: src={{ pound_ssl_cert.src }}
-    dest={{ pound_ssl_cert.dest }}
+- name: copy ssl certs
+  copy: src={{ item }}
+    dest="{{ pound_conf_path }}{{ item.split('/')[-1] }}"
     owner={{ pound_user }}
     group={{ pound_group }}
     mode=0400
-  when: pound_ssl_cert.src
+  with_items: pound_ssl_certs
+  when: pound_ssl_certs
   ignore_errors: True
   tags:
     - install
@@ -33,7 +34,7 @@
 
 - name: create pound configuration
   template: src=pound.cfg.j2
-    dest=/etc/pound/pound.cfg
+    dest={{ pound_conf_path }}pound.cfg
   notify: restart pound
   tags:
     - install

@@ -2,21 +2,27 @@
 pound_user: www-data
 pound_group: www-data
 pound_run_path: /var/run/pound/
-pound_listen_http: {
-    # Example ListenHTTP config:
-    # addr: 127.0.0.1,
-    # port: 80,
-    # backend_addr: 127.0.0.1,
-    # backend_port: 8088
-}
-pound_ssl_cert: {
-    # src: your_cert.crt,
-    # dest: /path/to/your_cert.crt
-}
-pound_listen_https: {
-    # addr: 127.0.0.1,
-    # port: 443,
-    # backend_addr: 127.0.0.1,
-    # backend_port: 8089,
-    # cert: "{{ pound_ssl_cert.dest }}"
-}
+pound_conf_path: /etc/pound/
+pound_ssl_certs: [
+  # "filename.pem", "another_filename.pem"
+]
+pound_listen_http: [
+# {
+#   Example ListenHTTP config:
+#   addr: 127.0.0.1,
+#   port: 80,
+#   backend_addr: 127.0.0.1,
+#   backend_port: 8088
+#   x_http: 2
+# }
+]
+pound_listen_https: [
+# {
+#   addr: 127.0.0.1,
+#   port: 443,
+#   backend_addr: 127.0.0.1,
+#   backend_port: 8089,
+#   certs: ["filename.pem"]  # looks in pound_conf_path
+#   x_http: 2
+# }
+]

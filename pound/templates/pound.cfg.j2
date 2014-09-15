@@ -21,38 +21,42 @@ Alive		30
 Control "{{ pound_run_path }}poundctl.socket"
 
 {% if pound_listen_http %}
+{% for conf in pound_listen_http %}
 ListenHTTP
-	Address	{{ pound_listen_http.addr }}
-	Port 	{{ pound_listen_http.port }}
+	Address	{{ conf.addr }}
+	Port 	{{ conf.port }}
 
-	## allow PUT and DELETE also (by default only GET, POST and HEAD)?:
-	xHTTP		0
+	xHTTP {{ conf.x_http|default(2) }}
 	HeadRemove "X-Forwarded-Ssl"
 
 	Service
 		BackEnd
-			Address	{{ pound_listen_http.backend_addr }}
-			Port	{{ pound_listen_http.backend_port }}
+			Address	{{ conf.backend_addr }}
+			Port	{{ conf.backend_port }}
 		End
 	End
 End
+{% endfor %}
 {% endif %}
 
 {% if pound_listen_https %}
+{% for conf in pound_listen_https %}
 ListenHTTPS
-	Cert 	"{{ pound_ssl_cert.dest }}"
-	Address	{{ pound_listen_https.addr }}
-	Port	{{ pound_listen_https.port }}
-
-	## allow PUT and DELETE also (by default only GET, POST and HEAD)?:
-	xHTTP		0
+	Address	{{ conf.addr }}
+	Port	{{ conf.port }}
+	{% for cert in conf.certs|default([]) %}
+	Cert 	"{{ pound_conf_path }}{{ cert }}"
+	{% endfor %}
+	
+	xHTTP {{ conf.x_http|default(2) }}
 	AddHeader "X-Forwarded-Ssl: on"
 
 	Service
 		BackEnd
-			Address	{{ pound_listen_https.backend_addr }}
-			Port	{{ pound_listen_https.backend_port }}
+			Address	{{ conf.backend_addr }}
+			Port	{{ conf.backend_port }}
 		End
 	End
 End
+{% endfor %}
 {% endif %}
