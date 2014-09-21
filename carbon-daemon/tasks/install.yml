@@ -1,0 +1,25 @@
+---
+# Install graphite, if necessary
+
+- name: pip | Make sure that pip is installed
+  apt: name={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - python-dev
+    - python-pip
+
+# Make sure that virtualenv is installed
+- pip: name=virtualenv state=present
+
+- name: Make sure that the virtual env directory exists
+  file: path={{ graphite_virtualenv }} state=directory
+
+- name: Install requirements
+  pip: name={{ item }} virtualenv={{ graphite_virtualenv }}
+  with_items:
+    - "{{ whisper_install }}"
+    - "{{ ceres_install }}"
+    - twisted
+    - txamqp
+
+- name: Install carbon
+  pip: name={{ carbon_install }} virtualenv={{ graphite_virtualenv }} extra_args='--install-option="--prefix={{ graphite_location }}"'

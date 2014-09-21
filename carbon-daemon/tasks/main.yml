@@ -1,0 +1,15 @@
+---
+
+- name: Set the graphite_virtualenv
+  set_fact: graphite_virtualenv="/var/venvs/graphite"
+  when: not graphite_virtualenv
+
+- name: Check if graphite is installed
+  shell: "test -d {{ graphite_location }} && test -d {{ graphite_location }}/conf"
+  register: graphite_installed
+  failed_when: graphite_installed.rc > 1
+
+- include: install.yml
+  when: graphite_installed.rc == 1
+
+- include: configure-daemon.yml

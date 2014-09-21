@@ -1,0 +1,21 @@
+- name: Make sure that the daemon directory exists
+  file: path=/opt/graphite/conf/carbon-daemons/{{ carbon_instance_name }} state=directory
+
+- name: Setup config files
+  template: src={{ item }}.conf.j2 dest="{{ graphite_location }}/conf/carbon-daemons/{{ carbon_instance_name }}/{{ item }}.conf"
+  with_items:
+    - daemon
+    - listeners
+    - writer
+    - storage-rules
+    - db
+    - relay
+
+- name: Check if carbon daemon is started
+  shell: source /var/venvs/graphite/bin/activate && /opt/graphite/bin/carbon-daemon.py {{ carbon_instance_name }} status executable=/bin/bash
+  register: carbon_status
+  failed_when: carbon_status.rc > 1
+
+- name: Start carbon daemon
+  shell: source /var/venvs/graphite/bin/activate && /opt/graphite/bin/carbon-daemon.py {{ carbon_instance_name }} start executable=/bin/bash
+  when: carbon_status.rc == 1

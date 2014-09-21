@@ -1,0 +1,25 @@
+---
+carbon_instance_name: carbon
+graphite_virtualenv: null
+graphite_location: /opt/graphite/
+
+carbon_install: 'https://github.com/graphite-project/carbon/archive/megacarbon.zip'
+ceres_install: 'https://github.com/graphite-project/ceres/archive/master.zip'
+whisper_install: 'whisper'
+
+carbon_pipeline: "write"
+carbon_listeners:
+  plaintext-receiver-2003:
+    port: 2003
+    type: plaintext-receiver
+  pickle-receiver-2004:
+    port: 2004
+    type: pickle-receiver
+carbon_storage_rules:
+  default_1min_for_1day:
+    match-all: "true"
+    retentions: "1m:1d"
+
+carbon_writer: {}
+carbon_db: {}
+carbon_relay: {}

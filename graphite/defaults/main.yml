@@ -1,0 +1,8 @@
+---
+# Defaults for carbon
+graphite_user: 'graphite'
+graphite_virtualenv: null
+
+carbon_install: 'https://github.com/graphite-project/carbon/archive/megacarbon.zip'
+ceres_install: 'https://github.com/graphite-project/ceres/archive/master.zip'
+whisper_install: 'whisper'

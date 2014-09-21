@@ -1,0 +1,12 @@
+---
+- hosts: all
+  roles:
+    - { role: carbon-daemon,
+        carbon_instance_name: "writer",
+        carbon_db: {
+            database: "ceres",
+            local_data_dir: "/opt/graphite/storage/ceres/",
+            whisper: {}
+        }
+    }
+  sudo: yes
