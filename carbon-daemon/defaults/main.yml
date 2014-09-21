@@ -7,6 +7,12 @@ carbon_install: 'https://github.com/graphite-project/carbon/archive/megacarbon.z
 ceres_install: 'https://github.com/graphite-project/ceres/archive/master.zip'
 whisper_install: 'whisper'
 
+carbon_aggregation: {}
+carbon_writer: {}
+carbon_db: {}
+carbon_relay: {}
+carbon_amqp: {}
+
 carbon_pipeline: "write"
 carbon_listeners:
   plaintext-receiver-2003:
@@ -15,11 +21,16 @@ carbon_listeners:
   pickle-receiver-2004:
     port: 2004
     type: pickle-receiver
+
 carbon_storage_rules:
   default_1min_for_1day:
     match-all: "true"
     retentions: "1m:1d"
-
-carbon_writer: {}
-carbon_db: {}
-carbon_relay: {}
+carbon_filter_rules: []
+carbon_aggregation_rules: []
+carbon_aggregation_filters: []
+carbon_relay_rules:
+  default:
+    default: "true"
+    destinations: "127.0.0.1:2004:a, 127.0.0.1:2104:b"
+carbon_rewrite_rules: []

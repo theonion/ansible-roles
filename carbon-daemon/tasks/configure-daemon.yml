@@ -4,12 +4,19 @@
 - name: Setup config files
   template: src={{ item }}.conf.j2 dest="{{ graphite_location }}/conf/carbon-daemons/{{ carbon_instance_name }}/{{ item }}.conf"
   with_items:
+    - aggregation-rules
+    - aggregation-filters
+    - aggregation
+    - amqp
     - daemon
-    - listeners
-    - writer
-    - storage-rules
     - db
+    - filter-rules
+    - listeners
+    - relay-rules
     - relay
+    - rewrite-rules
+    - storage-rules
+    - writer
 
 - name: Check if carbon daemon is started
   shell: source /var/venvs/graphite/bin/activate && /opt/graphite/bin/carbon-daemon.py {{ carbon_instance_name }} status executable=/bin/bash
