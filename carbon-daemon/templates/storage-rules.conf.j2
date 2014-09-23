@@ -119,11 +119,12 @@
 # datapoints in the same 10s interval, the last one received will take precedent.
 # If you sent 2 datapoints in a minute, each 10s interval without a datapoint
 # would be null.
-
-{% for name, data in carbon_storage_rules.iteritems() %}
+{% for rule in carbon_storage_rules %}
+{% for name, data in rule.items() %}
 [{{ name }}]
 {% for key, value in data.iteritems() %}
 {{ key }} = {{ value }}
 {% endfor %}
 
+{% endfor %}
 {% endfor %}
