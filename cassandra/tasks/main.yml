@@ -1,0 +1,17 @@
+---
+
+- name: Make sure PyCurl is here
+  apt: name=python-pycurl update_cache=yes cache_valid_time=3600
+
+- name: Add the Cassandra keys
+  apt_key: url=https://www.apache.org/dist/cassandra/KEYS id=2B5C1B00 state=present
+
+- name: Add the Cassandra repo
+  apt_repository: repo="deb http://www.apache.org/dist/cassandra/debian {{ cassandra_release }} main" state=present update_cache=yes
+
+- name: Install Cassandra
+  apt: name=cassandra state=present
+
+- name: Configure Cassandra
+  template: src=cassandra.yml.j2 dest=/etc/cassandra/cassandra.yml
+  notify: Restart Cassandra

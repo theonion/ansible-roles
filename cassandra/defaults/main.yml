@@ -1,0 +1,3 @@
+---
+cassandra_release: 20x
+cassandra_broadcast_address: null
