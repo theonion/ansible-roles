@@ -3,39 +3,50 @@
 
 # Make sure that pip and virtualenv are installed.
 - apt: name=python-pip state=present update_cache=yes cache_valid_time=3600
+  tags: uwsgi
 
 # Make sure that virtualenv is installed
 - pip: name=virtualenv state=present
+  tags: uwsgi
 
 # Install system packages
 - apt: name={{item}} state=present
   with_items: system_packages
+  tags: uwsgi
 
 # Make sure that the www directory exists
 - file: path=/www/ state=directory mode=750 owner=www-data group=www-data
+  tags: uwsgi
 
 # Create the user (if necessary)
 - user: name={{ appuser }} shell=/bin/bash createhome=yes group=www-data
   when: appuser == "www-data"
+  tags: uwsgi
 
 # Create the app user (if necessary)
 - user: name={{ app_name }} shell=/bin/bash createhome=yes group=www-data
+  tags: uwsgi
 
 # Make sure that the source directory exists
 - file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
+  tags: uwsgi
 
 - name: make sure .ssh folder exists for app
   file: path=/var/www/.ssh mode=700 state=directory owner=www-data
+  tags: uwsgi
 
 - name: add the authorized keys
   authorized_key: user=www-data key="{{ item }}"
   with_items: authorized_keys
+  tags: uwsgi
 
 - name: Make sure that the virtual env directory exists
   file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data
+  tags: uwsgi
 
 - name: Make sure that the virtualenv is created
   command: su {{ appuser }} -c "virtualenv {{ virtualenv_dir }}" creates={{ virtualenv_dir }}/bin/activate
+  tags: uwsgi
 
 # - name: adding venv source to .profile 
 #   lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='source .*/bin/activate' line='cd {{ source_dir }} && source /var/venvs/{{ app_name }}/bin/activate'
@@ -47,17 +58,22 @@
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   with_items: python_packages
   when: python_requirements == None
+  tags: uwsgi
 
 # Install python packages
 - pip: requirements="{{python_requirements}}" state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   when: python_requirements != None
+  tags: uwsgi
 
 # Create virtualenv directory
 - file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data recurse=yes
+  tags: uwsgi
 
 # Create a uwsgi configuration file
 - template: src=uwsgi.ini.j2 dest=/etc/uwsgi-emperor/vassals/{{ app_name }}.ini owner={{ appuser }} group=www-data
   when: app_enabled
+  tags: uwsgi
 
 # Make sure that uWSGI is started
 - service: name=uwsgi-emperor state=started
+  tags: uwsgi
