@@ -30,8 +30,8 @@
   with_items: elasticsearch_settings.items()
   notify: Restart elasticsearch
 
-- name: Make sure that elasticsearch is started
-  service: name=elasticsearch state=started
+- name: Make sure that elasticsearch is started (and runs on boot)
+  service: name=elasticsearch state=started enabled=yes
 
 - include: test.yml
   when: run_tests
