@@ -21,7 +21,7 @@
   ignore_errors: True
 
 - name: Get the npm install script
-  get_url: dest=/tmp/npm_install.sh url=https://www.npmjs.org/install.sh sha256sum=5c493b8be14d639f1ae76539cd8265777e69fa5ffd920b212cecee63c72f3564
+  get_url: dest=/tmp/npm_install.sh url=https://www.npmjs.org/install.sh
   when: npm_installed|failed
 
 - name: Install npm
