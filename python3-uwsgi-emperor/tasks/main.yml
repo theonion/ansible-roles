@@ -1,0 +1,34 @@
+# pip-3.2 is the current python3 pip vertion for wheezy - this will change with time
+
+- name: python3-uwsgi-emperor | ensure pip is installed
+  apt: name={{ item }} update_cache=yes cache_valid=3600
+  with_items:
+    - python3
+    - python-pip3
+
+- name: python3-uwsgi-emperor | ensure uwsgi is installed
+  pip: name=uwsgi state=latest executable=pip-3.2
+  sudo: yes
+
+- name: python3-uwsgi-emperor | set uwsgi binary path
+  set_fact: uwsgi_binary="/usr/local/bin/uwsgi"
+
+- name: python3-uwsgi-emperor | add the uwsgi default file
+  copy: dest=/etc/default/uwsgi-emperor src=etc/default/uwsgi-emperor owner=root group=www-data
+
+- name: python3-uwsgi-emperor | add the uwsgi configuration files
+  copy: dest=/etc/ src=etc/uwsgi-emperor owner=root group=www-data
+
+- name: python3-uwsgi-emperor | create the init.d script
+  template: src=etc/init.d/uwsgi-emperor.j2 dest=/etc/init.d/uwsgi-emperor owner=root group=www-data mode=755
+  notify:
+    - reload uwsgi-emperor
+
+- name: python3-uwsgi-emperor | create the vassal directory
+  file: path=/etc/uwsgi-emperor/vassals state=directory owner=www-data group=www-data
+
+- name: python3-uwsgi-emperor | create the log directory
+  file: path=/var/log/uwsgi state=directory owner=www-data group=www-data
+
+- name: python3-uwsgi-emperor | make sure uwsgi-emperor is running (and runs on boot)
+  service: name=uwsgi-emperor state=started enabled=yes
