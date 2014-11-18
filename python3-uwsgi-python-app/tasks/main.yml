@@ -1,0 +1,56 @@
+# pip-3.2 is the current python3 pip vertion for wheezy - this will change with time
+
+- name: python3-uwsgi-python-app | ensure pip is installed
+  apt: name={{ item }} update_cache=yes cache_valid=3600
+  with_items:
+    - build-essential
+    - python3-dev
+    - python3
+    - python-pip3
+
+- name: python3-uwsgi-python-app | ensure virtualenv is installed
+  pip: name=virtualenv state=latest executable=pip-3.2
+
+- name: python3-uwsgi-python-app | ensure system packages installed
+  apt: name={{ item }} state=latest
+  with_items: system_packages
+
+- name: python3-uwsgi-python-app | change owner of www
+  file: path=/www/ state=directory mode=750 owner=www-data group=www-data
+
+- name: python3-uwsgi-python-app | create user
+  user: name={{ appuser }} shell=/bin/bash createhome=yes group=www-data
+  when: appuser == "www-data"
+
+- name: python3-uwsgi-python-app | create app user
+  user: name={{ app_name }} shell=/bin/bash createhome=yes group=www-data
+
+- name: python3-uwsgi-python-app | ensure source directory exists
+  file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
+
+- name: python3-uwsgi-python-app | ensure .ssh folder exists for app
+  file: path=/var/www/.ssh mode=700 state=directory owner=www-data
+
+- name: python3-uwsgi-python-app | add the authorized keys
+  authorized_key: user=www-data key="{{ item }}"
+  with_items: authorized_keys
+
+- name: python3-uwsgi-python-app | ensure that the virtual env directory exists
+  file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data
+
+- name: python3-uwsgi-python-app | ensure that the virtualenv is created
+  command: su {{ appuser }} -c "virtualenv {{ virtualenv_dir }}" creates={{ virtualenv_dir }}/bin/activate
+
+- name: python3-uwsgi-python-app | install python packages
+  pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }} executable=pip-3.2
+  with_items: python_packages
+
+- name: python3-uwsgi-python-app | create virtualenv directory
+  file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data recurse=yes
+
+- name: python3-uwsgi-python-app | create a uwsgi configuration file
+  template: src=uwsgi.ini.j2 dest=/etc/uwsgi-emperor/vassals/{{ app_name }}.ini owner={{ appuser }} group=www-data
+  when: app_enabled
+
+- name: python3-uwsgi-python-app | ensure that uWSGI is started
+  service: name=uwsgi-emperor state=started
