@@ -3,13 +3,12 @@
 - name: python3-uwsgi-emperor | ensure pip is installed
   apt: name={{ item }} update_cache=yes cache_valid=3600
   with_items:
-    - build-essential
-    - python3-dev
     - python3
     - python-pip3
 
 - name: python3-uwsgi-emperor | ensure uwsgi is installed
   pip: name=uwsgi state=latest executable=pip-3.2
+  sudo: yes
 
 - name: python3-uwsgi-emperor | set uwsgi binary path
   set_fact: uwsgi_binary="/usr/local/bin/uwsgi"

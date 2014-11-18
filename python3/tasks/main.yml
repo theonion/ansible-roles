@@ -1,13 +1,7 @@
 # python 3.2 is the current python3 vertion for wheezy - this will change with time
 
-- name: python3 | ensure apt dependencies are installed
-  apt: name={{ item }} state=latest
-  with_items:
-    - build-essential
-    - python3-dev
-
 - name: python3 | install python3
   apt: name=python3 state=latest
 
 - name: python3 | install pip3
-  apt: name=python-pip3 state=latest
+  apt: name=python3-pip state=latest update_cache=yes
