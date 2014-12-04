@@ -1,5 +1,4 @@
----
+
 uwsgi_install_method: pip
 uwsgi_version: ~
-uwsgi_python_3: false
 run_tests: false

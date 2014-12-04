@@ -3,10 +3,19 @@
 
 # source | Install build requirements
 - apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  when: not uwsgi_python_3
   with_items:
     - build-essential
     - python
     - python-dev
+
+# source | Install build requirements
+- apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600
+  when: uwsgi_python_3
+  with_items:
+    - build-essential
+    - python3
+    - python3-dev
 
 - name: source | Check if uwsgi is installed
   command: which uwsgi

@@ -1,0 +1,8 @@
+---
+- hosts: all
+  roles:
+    - uwsgi-emperor
+  sudo: yes
+  vars:
+    uwsgi_install_method: pip
+    uwsgi_python_3: true
