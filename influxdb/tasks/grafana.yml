@@ -1,0 +1,28 @@
+---
+# downloads and sets up grafana
+
+- name: grafana | create directories
+  shell: mkdir -p ~/grafana
+
+- name: grafana | check if sources have been downloaded
+  stat: path=~/grafana/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
+  register: grafana_download
+
+- name: grafana | download source
+  get_url: url=http://grafanarel.s3.amazonaws.com/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz dest=~/grafana/
+  when: not grafana_download.stat.exists
+
+- name: grafana | extract archive
+  shell: tar -xzf ~/grafana/{{ GRAFANA_SOURCE_FILENAME }}.tar.gz
+
+- name: grafana | create directories
+  shell: mkdir -p /var/www/grafana
+
+- name: grafana | copy source
+  shell: cp -rf ~/{{ GRAFANA_SOURCE_FILENAME }}/* /var/www/grafana
+
+- name: grafana | chown
+  shell: chown -R www-data:www-data /var/www/grafana
+
+- name: grafana | copy config
+  template: src=grafana_config.js dest=/var/www/grafana/config.js

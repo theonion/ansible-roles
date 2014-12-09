@@ -1,0 +1,11 @@
+---
+# runs other sibling tasks
+
+- name: installing nginx...
+  include: nginx.yml
+
+- name: installing influxdb...
+  include: influxdb.yml
+
+- name: installing grafana...
+  include: grafana.yml

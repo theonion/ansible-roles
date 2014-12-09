@@ -1,0 +1,31 @@
+---
+# downloads and installs influxdb
+
+- name: influxdb | create folder
+  shell: mkdir -p ~/influxdb
+
+- name: influxdb | check if deb is present
+  stat: path=~/influxdb/{{ INFLUXDB_SOURCE_FILENAME }}.deb
+  register: influxdb_download
+
+- name: influxdb | download deb
+  get_url: url=http://s3.amazonaws.com/influxdb/{{ INFLUXDB_SOURCE_FILENAME }}.deb dest=~/influxdb
+  when: not influxdb_download.stat.exists
+
+- name: influxdb | install from deb
+  shell: dpkg -i ~/influxdb/{{ INFLUXDB_SOURCE_FILENAME }}.deb
+
+- name: influxdb | start service
+  service: name=influxdb state=started
+
+- name: influxdb | wait for service
+  wait_for: port=8086 delay=5
+
+- name: influxdb | create grafana db
+  shell: "curl -X POST 'http://localhost:8086/cluster/database_configs/grafana?u=root&p=root' -d '{\"name\": \"grafana\"}'"
+
+- name: influxdb | create grafana user
+  shell: "curl -X POST 'http://localhost:8086/db/grafana/users?u=root&p=root' -d '{\"name\": \"grafana\", \"password\": \"{{ INFLUXDB_GRAFANA_PASSWORD }}\"}'"
+
+- name: influxdb | change root password
+  shell: "curl -X POST 'http://localhost:8086/cluster_admins/root?u=root&p=root' -d '{\"password\": \"{{ INFLUXDB_ROOT_PASSWORD }}\"}'"
