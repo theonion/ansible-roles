@@ -1,11 +1,17 @@
 [uwsgi]
+{% if uwsgi is mapping %}
+{% for key, value in uwsgi.iteritems() %}
+{{ key }} = {{ value }}
+{% endfor %}
+{% else %}
+{% for item in uwsgi %}
+{{ item[0] }} = {{ item[1] }}
+{% endfor %}
+{% endif %}
 home = {{ virtualenv_dir }}
 pythonpath = {{ source_dir }}
 chdir = {{ source_dir }}
 {% if appuser != "www-data" %}username = {{ appuser }}{% endif %}
 {% for env_var in env_vars %}
 env = {{ env_var }}
-{% endfor %}
-{% for key, value in uwsgi.iteritems() %}
-{{ key }} = {{ value }}
 {% endfor %}

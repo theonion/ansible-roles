@@ -10,4 +10,3 @@ ENABLED=yes
 # init.d script to ignore VERBOSE value.
 # Here VERBOSE is overriden to conform such the practice.
 VERBOSE=yes
-
