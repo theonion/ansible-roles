@@ -21,11 +21,8 @@
 - name: influxdb | wait for service
   wait_for: port=8086 delay=5
 
+- name: influxdb | create oniontv db
+  shell: "curl -X POST \"http://localhost:8086/cluster/database_configs/oniontv?u=root&p=root\" -d '{\"spaces\": [{\"name\": \"default\",\"retentionPolicy\": \"7d\",\"shardDuration\": \"1d\",\"regex\": \"/.*/\",\"replicationFactor\": 1,\"split\": 1},{\"name\": \"5m_rollups\",\"retentionPolicy\": \"30d\",\"shardDuration\": \"7d\",\"regex\": \"/.*\\.5m/\",\"replicationFactor\": 1,\"split\": 1},{\"name\": \"1h_rollups\",\"retentionPolicy\": \"30d\",\"shardDuration\": \"7d\",\"regex\": \"/.*\\.1h/\",\"replicationFactor\": 1,\"split\": 1},{\"name\": \"1d_rollups\",\"retentionPolicy\": \"365d\",\"shardDuration\": \"30d\",\"regex\": \"/.*\\.1d/\",\"replicationFactor\": 1,\"split\": 1}],\"continuousQueries\": [\"select video_name, sum(plays) as total_plays from avclub group by video_name, time(5m) into avclub.5m\",\"select video_name, sum(plays) as total_plays from clickhole group by video_name, time(5m) into clickhole.5m\",\"select video_name, sum(plays) as total_plays from onion group by video_name, time(5m) into onion.5m\",\"select video_name, sum(plays) as total_plays from labs group by video_name, time(5m) into labs.5m\",\"select video_name, sum(plays) as total_plays from avclub group by video_name, time(1h) into avclub.1h\",\"select video_name, sum(plays) as total_plays from clickhole group by video_name, time(1h) into clickhole.1h\",\"select video_name, sum(plays) as total_plays from onion group by video_name, time(1h) into onion.1h\",\"select video_name, sum(plays) as total_plays from labs group by video_name, time(1h) into labs.1h\",\"select video_name, sum(plays) as total_plays from avclub group by video_name, time(1d) into avclub.1d\",\"select video_name, sum(plays) as total_plays from clickhole group by video_name, time(1d) into clickhole.1d\",\"select video_name, sum(plays) as total_plays from onion group by video_name, time(1d) into onion.1d\",\"select video_name, sum(plays) as total_plays from labs group by video_name, time(1d) into labs.1d\"]}'"
+
 - name: influxdb | create grafana db
-  shell: "curl -X POST 'http://localhost:8086/cluster/database_configs/grafana?u=root&p=root' -d '{\"name\": \"grafana\"}'"
-
-- name: influxdb | create grafana user
-  shell: "curl -X POST 'http://localhost:8086/db/grafana/users?u=root&p=root' -d '{\"name\": \"grafana\", \"password\": \"{{ INFLUXDB_GRAFANA_PASSWORD }}\"}'"
-
-- name: influxdb | change root password
-  shell: "curl -X POST 'http://localhost:8086/cluster_admins/root?u=root&p=root' -d '{\"password\": \"{{ INFLUXDB_ROOT_PASSWORD }}\"}'"
+  shell: "curl -X POST \"http://localhost:8086/cluster/database_configs/grafana?u=root&p=root\" -d '{\"name\": \"grafana\"}'"
