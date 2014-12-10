@@ -1,0 +1,42 @@
+---
+
+- name: Download source
+  get_url: url=https://grafanarel.s3.amazonaws.com/{{ grafana_version }}.tar.gz
+  tags:
+    - grafana
+
+- name: Extract archive
+  unarchive: src=~/{{ grafana_version }}.tar.gz dest=~/grafana
+  tags:
+    - grafana
+
+- name: Make sure the www dir exists
+  file: path=/www state=directory mode=750 owner=www-data group=www-data
+  tags:
+    - grafana
+
+- name: Make sure the www/grafana dir exists
+  file: path=/www/grafana state=directory mode=750 owner=www-data group=www-data
+  tags:
+    - grafana
+
+- name: Copy resources
+  shell: cp -rf ~/grafana/* /www/grafana
+  tags:
+    - grafana
+
+- name: Chown resources
+  shell: chown -R www-data /www/grafana
+  tags:
+    - grafana
+
+- name: Copy config template
+  template: src=config.js.j2 dest=/www/grafana/config.js
+  tags:
+    - grafana
+
+- name: Copy nginx config
+  template: src=grafana.config.j2 dest=/etc/nginx/conf.d/grafana.config
+  tags:
+    - grafana
+    - nginx

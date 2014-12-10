@@ -1,0 +1,5 @@
+---
+# declares dependencies
+
+dependencies:
+  - nginx

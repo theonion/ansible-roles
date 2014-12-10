@@ -1,11 +1,67 @@
 ---
-# runs other sibling tasks
 
-- name: installing nginx...
-  include: nginx.yml
+- name: Download version
+  get_url: url={{influxdb_dl_url}} dest={{influxdb_pkg}}
+  tags:
+    - influxdb
 
-- name: installing influxdb...
-  include: influxdb.yml
+- name: Install package
+  command: dpkg --skip-same-version -i /usr/local/src/influxdb_{{ influxdb_ver }}_{{ influxdb_arch }}.deb
+  register: dpkg_result
+  changed_when: "dpkg_result.stdout.startswith('Selecting')"
+  tags:
+    - influxdb
 
-- name: installing grafana...
-  include: grafana.yml
+- name: Remove init.d script
+  file: path=/etc/init.d/influxdb state=absent
+  when: influxdb_keep_initd == true
+  tags:
+    - influxdb
+
+- name: Check for ip address in config file
+  command: grep -E '^\s*hostname.*{{influxdb_hostname}}' {{influxdb_config_file}}
+  register: config_has_ip
+  ignore_errors: true
+  changed_when: false
+  tags:
+    - influxdb
+
+- name: Delete raft dir before hostname change
+  file: dest={{influxdb_raft_dir}} state=absent
+  when: config_has_ip|failed
+  tags:
+    - influxdb
+
+- name: Create storage dir
+  file: path="{{influxdb_storage_dir}}" state=directory group={{influxdb_group}} owner={{influxdb_user}}
+  tags:
+    - influxdb
+
+- name: Ensure log directory
+  file: path="{{influxdb_log_dir}}" state=directory group={{influxdb_group}} owner={{influxdb_user}}
+  tags:
+    - influxdb
+
+- name: Write config
+  template: src=conf.j2 dest={{influxdb_config_file}} group={{influxdb_group}} owner={{influxdb_user}}
+  notify:
+    - restart influxdb
+  tags:
+    - influxdb
+
+- name: Write upstart
+  template: src=upstart.j2 dest=/etc/init/influxdb_conf mode=0755
+  when: influxdb_keep_initd == false
+  tags:
+    - influxdb
+
+- name: Start influxdb service
+  service: name=influxdb state=started
+  tags:
+    - influxdb
+
+- name: Iptables
+  template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
+  tags:
+    - influxdb
+    - iptables

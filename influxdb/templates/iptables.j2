@@ -1,0 +1,3 @@
+# InfluxDB
+-A INPUT -p tcp -m multiport --dports {{ influxdb_admin_port }},{{ influxdb_api_port }},{{ influxdb_proto_port }} -j ACCEPT
+-A INPUT -p udp -m multiport --dports {{ influxdb_admin_port }},{{ influxdb_api_port }},{{ influxdb_proto_port }} -j ACCEPT
