@@ -1,6 +1,7 @@
 ---
 - hosts: all
   roles:
+    - python3
     - uwsgi-emperor
   sudo: yes
   vars:

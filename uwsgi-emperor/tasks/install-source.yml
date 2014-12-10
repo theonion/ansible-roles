@@ -38,11 +38,30 @@
   when: uwsgi_exists|failed
 
 - name: source | Build uwsgi
-  command: make chdir=/tmp/uwsgi
+  command: make PROFILE=nolang chdir=/tmp/uwsgi
+  when: uwsgi_exists|failed
+
+- name: source | Build python2 plugin
+  shell: PYTHON=python2 ./uwsgi --build-plugin "plugins/python python2" chdir=/tmp/uwsgi executable=/bin/bash
+  when: uwsgi_exists|failed
+
+- name: source | Build python32 plugin
+  shell: PYTHON=python3 ./uwsgi --build-plugin "plugins/python python3" chdir=/tmp/uwsgi executable=/bin/bash
   when: uwsgi_exists|failed
 
 - name: source | Move the binary
   command: mv /tmp/uwsgi/uwsgi /usr/bin/uwsgi
+  when: uwsgi_exists|failed
+
+- name: source | Create the plugins directory
+  file: path=/etc/uwsgi-emperor/plugins/ state=directory
+  when: uwsgi_exists|failed
+
+- name: source | Move the plugins
+  command: mv /tmp/uwsgi/{{ item }} /etc/uwsgi-emperor/plugins/ 
+  with_items:
+    - python2_plugin.so
+    - python3_plugin.so
   when: uwsgi_exists|failed
 
 - name: Set the binary path
