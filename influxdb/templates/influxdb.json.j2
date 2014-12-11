@@ -12,7 +12,7 @@
       "name": "5m_rollups",
       "retentionPolicy": "30d",
       "shardDuration": "7d",
-      "regex": "/.*\\.5m/",
+      "regex": "/5m\\..*/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
@@ -20,7 +20,7 @@
       "name": "1h_rollups",
       "retentionPolicy": "60d",
       "shardDuration": "7d",
-      "regex": "/.*\\.1h/",
+      "regex": "/1h\\..*/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
@@ -28,7 +28,7 @@
       "name": "1d_rollups",
       "retentionPolicy": "365d",
       "shardDuration": "30d",
-      "regex": "/.*\\.1d/",
+      "regex": "/1d\\..*/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     }
