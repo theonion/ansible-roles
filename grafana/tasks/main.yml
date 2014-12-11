@@ -1,12 +1,12 @@
 ---
 
 - name: Download source
-  get_url: url=https://grafanarel.s3.amazonaws.com/{{ grafana_version }}.tar.gz
+  get_url: url=http://grafanarel.s3.amazonaws.com/{{ grafana_version }}.tar.gz dest=~/
   tags:
     - grafana
 
 - name: Extract archive
-  unarchive: src=~/{{ grafana_version }}.tar.gz dest=~/grafana
+  shell: tar -xzf ~/{{ grafana_version }}.tar.gz
   tags:
     - grafana
 
@@ -21,7 +21,7 @@
     - grafana
 
 - name: Copy resources
-  shell: cp -rf ~/grafana/* /www/grafana
+  shell: cp -rf /home/vagrant/{{ grafana_version }}/* /www/grafana
   tags:
     - grafana
 
@@ -36,7 +36,13 @@
     - grafana
 
 - name: Copy nginx config
-  template: src=grafana.config.j2 dest=/etc/nginx/conf.d/grafana.config
+  template: src=grafana.conf.j2 dest=/etc/nginx/conf.d/grafana.conf
+  tags:
+    - grafana
+    - nginx
+
+- name: Restart nginx
+  service: name=nginx state=restarted
   tags:
     - grafana
     - nginx

@@ -60,6 +60,32 @@
   tags:
     - influxdb
 
+- name: Make sure influxdb api port is open
+  wait_for: port=8086 delay=2
+
+- name: Copy influxdb database shard config
+  copy: src=influxdb.json dest=~/
+  tags:
+    - influxdb
+
+- name: Copy grafana database shard config
+  copy: src=grafana.json dest=~/
+  tags:
+    - influxdb
+
+- name: Create and define influxdb database
+  shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/influxdb?u=root&p=root\" -d @influxdb.json"
+  tags:
+    - influxdb
+
+- name: Create and define grafana database
+  shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/grafana?u=root&p=root\" -d @grafana.json"
+  tags:
+    - influxdb
+
+- name: Ensure iptables dir
+  file: path=/etc/iptables.d/ state=directory mode=750
+
 - name: Iptables
   template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
   tags:
