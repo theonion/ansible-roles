@@ -23,7 +23,7 @@ port     = {{ influxdb_api_port }}    # binding is disabled if the port isn't se
 # ssl-port = 8084    # Ssl support is enabled if you set a port and cert
 # ssl-cert = /path/to/cert.pem
 
-# connections will timeout after this amount of time. Ensures that clients that misbehave
+# connections will timeout after this amount of time. Ensures that clients that misbehave 
 # and keep alive connections they don't use won't end up connection a million times.
 # However, if a request is taking longer than this to complete, could be a problem.
 read-timeout = "{{ influxdb_read_timeout }}"
@@ -33,8 +33,8 @@ read-timeout = "{{ influxdb_read_timeout }}"
   # Configure the graphite api
   [input_plugins.graphite]
   enabled = {{ influxdb_graphite_plugin_enabled }}
-  port = {{ influxdb_graphite_plugin_port }}
-  database = "{{ influxdb_graphite_plugin_db }}"  # store graphite data in this database
+  # port = {{ influxdb_graphite_plugin_port }}
+  # database = "{{ influxdb_graphite_plugin_db }}"  # store graphite data in this database
 
 # Raft configuration
 [raft]
@@ -55,64 +55,6 @@ dir = "{{ influxdb_storage_dir }}"
 # will be replayed from the WAL
 write-buffer-size = {{ influxdb_write_buffer }}
 
-# the engine to use for new shards, old shards will continue to use the same engine
-default-engine = "rocksdb"
-
-# The server will check this often for shards that have expired that should be cleared.
-retention-sweep-period = "10m"
-
-[storage.engines.leveldb]
-
-# Maximum mmap open files, this will affect the virtual memory used by
-# the process
-max-open-files = {{ influxdb_max_of }}
-
-# LRU cache size, LRU is used by leveldb to store contents of the
-# uncompressed sstables. You can use `m` or `g` prefix for megabytes
-# and gigabytes, respectively.
-lru-cache-size = "{{ influxdb_lru_cache }}"
-
-[storage.engines.rocksdb]
-
-# Maximum mmap open files, this will affect the virtual memory used by
-# the process
-max-open-files = {{ influxdb_max_of }}
-
-# LRU cache size, LRU is used by leveldb to store contents of the
-# uncompressed sstables. You can use `m` or `g` prefix for megabytes
-# and gigabytes, respectively.
-lru-cache-size = "{{ influxdb_lru_cache }}"
-
-# The default setting on this is 0, which means unlimited. Set this to something if you want to
-# limit the max number of open files. max-open-files is per shard so this * that will be max.
-max-open-shards = {{ influxdb_max_open_shards }}
-
-# The default setting is 100. This option tells how many points will be fetched from LevelDb before
-# they get flushed into backend.
-point-batch-size = {{ influxdb_point_batch }}
-
-[storage.engines.hyperleveldb]
-
-# Maximum mmap open files, this will affect the virtual memory used by
-# the process
-max-open-files = {{ influxdb_max_of }}
-
-# LRU cache size, LRU is used by leveldb to store contents of the
-# uncompressed sstables. You can use `m` or `g` prefix for megabytes
-# and gigabytes, respectively.
-lru-cache-size = "{{ influxdb_lru_cache }}"
-
-# The default setting on this is 0, which means unlimited. Set this to something if you want to
-# limit the max number of open files. max-open-files is per shard so this * that will be max.
-max-open-shards = {{ influxdb_max_open_shards }}
-
-# The default setting is 100. This option tells how many points will be fetched from LevelDb before
-# they get flushed into backend.
-point-batch-size = {{ influxdb_point_batch }}
-
-[storage.engines.lmdb]
-map-size = "100g"
-
 [cluster]
 # A comma separated list of servers to seed
 # this server. this is only relevant when the
@@ -123,6 +65,7 @@ map-size = "100g"
 
 # Here's an example. Note that the port on the host is the same as the raft port.
 # seed-servers = ["hosta:8090","hostb:8090"]
+{% if influxdb_seed_servers %}seed-servers = {{ influxdb_seed_servers }}{% endif %}
 
 # Replication happens over a TCP connection with a Protobuf protocol.
 # This port should be reachable between all servers in a cluster.
@@ -132,7 +75,7 @@ protobuf_port = {{ influxdb_proto_port }}
 protobuf_timeout = "{{ influxdb_proto_timeout }}" # the write timeout on the protobuf conn any duration parseable by time.ParseDuration
 protobuf_heartbeat = "{{ influxdb_proto_heartbeat }}" # the heartbeat interval between the servers. must be parseable by time.ParseDuration
 protobuf_min_backoff = "{{ influxdb_proto_min_backoff }}" # the minimum backoff after a failed heartbeat attempt
-protobuf_max_backoff = "{{ influxdb_proto_min_backoff }}" # the maxmimum backoff after a failed heartbeat attempt
+protobuf_max_backoff = "{{ influxdb_proto_min_backoff }}" # the maximum backoff after a failed heartbeat attempt
 
 # How many write requests to potentially buffer in memory per server. If the buffer gets filled then writes
 # will still be logged and once the server has caught up (or come back online) the writes
@@ -150,6 +93,39 @@ max-response-buffer-size = {{ influxdb_resp_buffer }}
 # Setting this higher will give better performance, but you'll need more memory. Setting this to 1 will ensure
 # that you don't need to buffer in memory, but you won't get the best performance.
 concurrent-shard-query-limit = {{ influxdb_shard_q_limit }}
+
+[sharding]
+  # how many servers in the cluster should have a copy of each shard.
+  # this will give you high availability and scalability on queries
+  replication-factor = {{ influxdb_repl_factor }}
+
+  [sharding.short-term]
+  # each shard will have this period of time. Note that it's best to have
+  # group by time() intervals on all queries be < than this setting. If they are
+  # then the aggregate is calculated locally. Otherwise, all that data gets sent
+  # over the network when doing a query.
+  duration = "{{ influxdb_short_term_dur }}"
+
+  # split will determine how many shards to split each duration into. For example,
+  # if we created a shard for 2014-02-10 and split was set to 2. Then two shards
+  # would be created that have the data for 2014-02-10. By default, data will
+  # be split into those two shards deterministically by hashing the (database, series)
+  # tuple. That means that data for a given series will be written to a single shard
+  # making querying efficient. That can be overridden with the next option.
+  split = {{ influxdb_short_term_split }}
+
+  # You can override the split behavior to have the data for series that match a
+  # given regex be randomly distributed across the shards for a given interval.
+  # You can use this if you have a hot spot for a given time series writing more
+  # data than a single server can handle. Most people won't have to resort to this
+  # option. Also note that using this option means that queries will have to send
+  # all data over the network so they won't be as efficient.
+  # split-random = "/^hf.*/"
+
+  [sharding.long-term]
+  duration = "{{ influxdb_long_term_dur }}"
+  split = {{ influxdb_long_term_split }}
+  # split-random = "/^Hf.*/"
 
 [wal]
 

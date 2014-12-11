@@ -62,32 +62,37 @@
 
 - name: Make sure influxdb api port is open
   wait_for: port=8086 delay=2
+  when: not influxdb_seed_servers
 
 - name: Copy influxdb database shard config
-  copy: src=influxdb.json dest=~/
+  template: src=influxdb.json.j2 dest=~/influxdb.json
+  when: not influxdb_seed_servers
   tags:
     - influxdb
 
 - name: Copy grafana database shard config
-  copy: src=grafana.json dest=~/
+  template: src=grafana.json.j2 dest=~/grafana.json
+  when: not influxdb_seed_servers
   tags:
     - influxdb
 
 - name: Create and define influxdb database
   shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/influxdb?u=root&p=root\" -d @influxdb.json"
+  when: not influxdb_seed_servers
   tags:
     - influxdb
 
 - name: Create and define grafana database
   shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/grafana?u=root&p=root\" -d @grafana.json"
+  when: not influxdb_seed_servers
   tags:
     - influxdb
 
-- name: Ensure iptables dir
-  file: path=/etc/iptables.d/ state=directory mode=750
-
-- name: Iptables
-  template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
-  tags:
-    - influxdb
-    - iptables
+#- name: Ensure iptables dir
+#  file: path=/etc/iptables.d/ state=directory mode=750
+#
+#- name: Iptables
+#  template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
+#  tags:
+#    - influxdb
+#    - iptables

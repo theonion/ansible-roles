@@ -1,26 +1,20 @@
-# Grafana Role
+# InfluxDB Role
 
 ## variables
 
 ### required variables
 
-| name                           | example      |
-| ------------------------------ | ------------ |
-| grafana_influxdb_hostname      | influx.local |
-| grafana_influxdb_database_name | influxdb     |
-| grafana_influxdb_username      | root         |
-| grafana_influxdb_password      | root         |
+| name                   | example      |
+| ---------------------- | ------------ |
+| influxdb_hostname      | influx.local |
+
 
 
 ### optional variables
 
-| name                        | default          |
-| --------------------------- | ---------------- |
-| grafana_version             | 1.9.0            |
-| grafana_max_results         | 1000             |
-| grafana_playlist_timespan   | 1m               |
-| grafana_admin_password      | ''               |
-| grafana_window_title_prefix | 'Onion Stats - ' |
+| name                  | example                           |
+| --------------------- | --------------------------------- |
+| influxdb_seed_servers | '\["other-influx.local:8090", \]' |
 
 
 
@@ -182,3 +176,4 @@ end
 
     - authorized_key: user=www-data key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 ```
+

@@ -5,7 +5,7 @@
       "retentionPolicy": "7d",
       "shardDuration": "1d",
       "regex": "/.*/",
-      "replicationFactor": 1,
+      "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
     {
@@ -13,7 +13,7 @@
       "retentionPolicy": "30d",
       "shardDuration": "7d",
       "regex": "/.*\\.5m/",
-      "replicationFactor": 1,
+      "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
     {
@@ -21,7 +21,7 @@
       "retentionPolicy": "60d",
       "shardDuration": "7d",
       "regex": "/.*\\.1h/",
-      "replicationFactor": 1,
+      "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
     {
@@ -29,7 +29,7 @@
       "retentionPolicy": "365d",
       "shardDuration": "30d",
       "regex": "/.*\\.1d/",
-      "replicationFactor": 1,
+      "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     }
   ]

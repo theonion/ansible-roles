@@ -4,17 +4,17 @@ define(['settings'], function (Settings) {
     datasources: {
       influxdb: {
         type: 'influxdb',
-        url: "http://{{ influxdb_hostname }}:8086/db/{{ influxdb_database_name }}",
-        username: '{{ influxdb_username }}',
-        password: '{{ influxdb_password }}',
+        url: "http://{{ grafana_influxdb_hostname }}:8086/db/{{ grafana_influxdb_database_name }}",
+        username: '{{ grafana_influxdb_username }}',
+        password: '{{ grafana_influxdb_password }}',
         default: true
       },
 
       grafana: {
         type: 'influxdb',
-        url: "http://{{ influxdb_hostname }}:8086/db/grafana",
-        username: '{{ influxdb_username }}',
-        password: '{{ influxdb_password }}',
+        url: "http://{{ grafana_influxdb_hostname }}:8086/db/grafana",
+        username: '{{ grafana_influxdb_username }}',
+        password: '{{ grafana_influxdb_password }}',
         grafanaDB: true
       }
     },
