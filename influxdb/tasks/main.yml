@@ -88,6 +88,21 @@
   tags:
     - influxdb
 
+- name: Create grafana user
+  shell: "curl -X POST \"http://localhost:8086/db/grafana/users?u=root&p=root\" -d '{\"name\": \"grafana\", \"password\": \"grafana\", \"readFrom\": \".*\", \"writeTo\": \"grafana\"}'"
+  tags:
+    - influxdb
+
+- name: Create influx db client user
+  shell: "curl -X POST \"http://localhost:8086/db/influxdb/users?u=root&p=root\" -d '{\"name\": \"influx\", \"password\": \"{{ influxdb_influx_password }}\", \"readFrom\": \".*\", \"writeTo\": \"influxdb\"}'"
+  tags:
+    - influxdb
+
+- name: Change root password
+  shell: "curl -X POST \"http://localhost:8086/cluster_admins/root?u=root&p=root\" -d '{\"password\": \"{{ influxdb_root_password }}\"}'"
+  tags:
+    - influxdb
+
 #- name: Ensure iptables dir
 #  file: path=/etc/iptables.d/ state=directory mode=750
 #

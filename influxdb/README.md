@@ -4,9 +4,11 @@
 
 ### required variables
 
-| name                   | example      |
-| ---------------------- | ------------ |
-| influxdb_hostname      | influx.local |
+| name                     | example      |
+| ------------------------ | ------------ |
+| influxdb_hostname        | influx.local |
+| influxdb_influx_password | password!    |
+| influxdb_root_password   | password!    |
 
 
 

@@ -7,9 +7,6 @@
 | name                           | example      |
 | ------------------------------ | ------------ |
 | grafana_influxdb_hostname      | influx.local |
-| grafana_influxdb_database_name | influxdb     |
-| grafana_influxdb_username      | root         |
-| grafana_influxdb_password      | root         |
 
 
 ### optional variables
