@@ -21,7 +21,7 @@
     - grafana
 
 - name: Copy resources
-  shell: cp -rf /home/vagrant/{{ grafana_version }}/* /www/grafana
+  shell: cp -rf /var/ansible/{{ grafana_version }}/* /www/grafana
   tags:
     - grafana
 
