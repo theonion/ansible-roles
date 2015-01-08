@@ -1,0 +1,9 @@
+---
+
+apps: "avclub clickhole"
+host: localhost
+port: 8086
+username: root
+password: root
+hourly_offset: "2h"
+daily_offset: "2d"

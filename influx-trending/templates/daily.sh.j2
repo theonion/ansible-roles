@@ -1,0 +1,12 @@
+#!/bin/sh
+
+source /var/venvs/influx-trending/bin/activate
+
+for APP in {{ apps }};
+do
+    python percentile.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1d.percentile.99" "$APP.rollup.1d" "$APP.rollup.1d.trending.99" "{{ daily_offset }}";
+done
+
+deactivate
+
+exit 0
