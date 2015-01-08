@@ -40,12 +40,12 @@
     - influx-trending
 
 - name: create cron job for hourly script
-  cron: name="influx-trending hourly" minute="0" job="/var/influx-trending/hourly.sh"
+  cron: name="influx-trending hourly" minute="20" job="/var/influx-trending/hourly.sh"
   tags:
     - influx-trending
 
 - name: create cron job for daily script
-  cron: name="influx-trending daily" minute="0" hour="0" job="/var/influx-trending/daily.sh"
+  cron: name="influx-trending daily" minute="20" hour="0" job="/var/influx-trending/daily.sh"
   tags:
     - influx-trending
 
