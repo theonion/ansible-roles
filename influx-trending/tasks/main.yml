@@ -1,10 +1,11 @@
 ---
 
-- name: ensure pip is installed
+- name: ensure pip and git are installed
   apt: name={{ item }} update_cache=yes
   with_items:
     - python3
     - python3-pip
+    - git
   tags:
     - influx-trending
 
@@ -14,7 +15,7 @@
     - influx-trending
 
 - name: git clone repo
-  git: repo=https://github.com/theonion/influx-trending.git dest=/var
+  git: repo=https://github.com/theonion/influx-trending.git dest=/var/influx-trending
   tags:
     - influx-trending
 
@@ -23,18 +24,18 @@
   tags:
     - influx-trending
 
-- name: install required packages
-  command: source /var/venvs/influx-trending/bin/activate && pip install /var/influx-trending/requirements.txt && deactivate
+- name: pip install required packages
+  pip: requirements="/var/influx-trending/requirements.txt" virtualenv="/var/venvs/influx-tending"
   tags:
     - influx-trending
 
 - name: copy hourly trending script
-  template: src=hourly.sh.j2 dest=/var/influx-trending/hourly.sh
+  template: src=hourly.sh.j2 dest=/var/influx-trending/hourly.sh mode="0711"
   tags:
     - influx-trending
 
 - name: copy daily trending script
-  template: src=daily.sh.j2 dest=/var/influx-trending/daily.sh
+  template: src=daily.sh.j2 dest=/var/influx-trending/daily.sh mode="0711"
   tags:
     - influx-trending
 
@@ -47,3 +48,6 @@
   cron: name="influx-trending daily" minute="0" hour="0" job="/var/influx-trending/daily.sh"
   tags:
     - influx-trending
+
+- name: restart cron
+  service: name="cron" state=restarted
