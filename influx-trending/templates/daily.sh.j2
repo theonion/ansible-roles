@@ -3,6 +3,6 @@
 
 for APP in {{ apps }};
 do
-    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/percentile.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1d.percentile.99" "$APP.rollup.1d" "$APP.rollup.1d.trending.99" "{{ daily_offset }}" && deactivate
+    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/percentile.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1d.percentile.99" "$APP.rollup.1d" "$APP.rollup.1d.popular.99" "{{ daily_offset }}" && deactivate
 done
 exit 0

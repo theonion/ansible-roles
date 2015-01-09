@@ -10,13 +10,6 @@ define(['settings'], function (Settings) {
         default: true
       },
 
-      influxdb2: {
-        type: 'influxdb',
-        url: "http://{{ grafana_influxdb_hostname }}:8086/db/influxdb2",
-        username: 'grafana',
-        password: 'grafana'
-      },
-
       grafana: {
         type: 'influxdb',
         url: "http://{{ grafana_influxdb_hostname }}:8086/db/grafana",

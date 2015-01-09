@@ -12,7 +12,7 @@
       "name": "5m-rollups",
       "retentionPolicy": "30d",
       "shardDuration": "7d",
-      "regex": "/.*\\.5m(\\.(percentile|trending)\\.\\d+)?$/",
+      "regex": "/.*\\.5m(\\.(percentile|trending|popular)(\\.\\d+)?)?$/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
@@ -20,7 +20,7 @@
       "name": "1h-rollups",
       "retentionPolicy": "90d",
       "shardDuration": "7d",
-      "regex": "/.*\\.1h(\\.(percentile|trending)\\.\\d+)?$/",
+      "regex": "/.*\\.1h(\\.(percentile|trending|popular)(\\.\\d+)?)?$/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     },
@@ -28,7 +28,7 @@
       "name": "1d-rollups",
       "retentionPolicy": "1825d",
       "shardDuration": "30d",
-      "regex": "/.*\\.1d(\\.(percentile|trending)\\.\\d+)?$/",
+      "regex": "/.*\\.1d(\\.(percentile|trending|popular)(\\.\\d+)?)?$/",
       "replicationFactor": {{ influxdb_repl_factor }},
       "split": 1
     }
@@ -37,7 +37,7 @@
     "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(5m) into :series_name.rollup.5m",
     "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(1h) into :series_name.rollup.1h",
     "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(1d) into :series_name.rollup.1d",
-    "select percentile(clicks, 99) from /^.*\\.rollup.1h$/ group by time(1h) into :series_name.percentile.99",
-    "select percentile(clicks, 99) from /^.*\\.rollup.1d$/ group by time(1d) into :series_name.percentile.99"
+    "select percentile(clicks, 99) as threshold from /^.*\\.rollup.1h$/ group by time(1h) into :series_name.percentile.99",
+    "select percentile(clicks, 99) as threshold from /^.*\\.rollup.1d$/ group by time(1d) into :series_name.percentile.99"
   ]
 }
