@@ -27,8 +27,8 @@
 - name: python3-uwsgi-python-app | create app user
   user: name={{ app_name }} shell=/bin/bash createhome=yes group=www-data
 
-- name: python3-uwsgi-python-app | ensure source directory exists
-  file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
+# - name: python3-uwsgi-python-app | ensure source directory exists
+#   file: path={{ source_dir }} state=directory mode=770 owner={{ appuser }} group=www-data
 
 - name: python3-uwsgi-python-app | ensure .ssh folder exists for app
   file: path=/var/www/.ssh mode=700 state=directory owner=www-data
