@@ -1,0 +1,9 @@
+#!/bin/sh
+
+
+for APP in {{ apps }};
+do
+    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/summation.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.5m" "$APP.rollup.5m.sums" "5m" && deactivate
+    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/trending.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.5m.sums" "$APP.rollup.5m.trending" "15m" && deactivate
+done
+exit 0
