@@ -1,10 +1,10 @@
 #!/bin/sh
 
 
-for APP in {{ apps }};
+for APP in avclub clickhole videohub;
 do
-    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/popular.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1h.percentile.99" "$APP.rollup.1h" "$APP.rollup.1h.popular.99" "{{ hourly_offset }}" && deactivate
-    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/summation.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1h" "$APP.rollup.1h.sums" "1h" && deactivate
-    . /var/venvs/influx-trending/bin/activate && python /var/influx-trending/trending.py "{{ host }}" "{{ port }}" "{{ username }}" "{{ password }}" "{{ db }}" "$APP.rollup.1h.sums" "$APP.rollup.1h.trending" "3h" && deactivate
+    . ~/Workspace/.envs/influx-trending/bin/activate && python ~/Workspace/influx-trending/popular.py "97.107.142.62" "8086" "root" "oaWUAkUdUu" "influxdb" "$APP.rollup.1h.percentile.99" "$APP.rollup.1h" "$APP.rollup.1h.popular.99" "2h" && deactivate
+    . ~/Workspace/.envs/influx-trending/bin/activate && python ~/Workspace/influx-trending/summation.py "97.107.142.62" "8086" "root" "oaWUAkUdUu" "influxdb" "$APP.rollup.1h" "$APP.rollup.1h.sums" "1h" && deactivate
+    . ~/Workspace/.envs/influx-trending/bin/activate && python ~/Workspace/influx-trending/trending.py "97.107.142.62" "8086" "root" "oaWUAkUdUu" "influxdb" "$APP.rollup.1h.sums" "$APP.rollup.1h.trending" "3h" && deactivate
 done
 exit 0
