@@ -1,0 +1,113 @@
+---
+
+- name: Download version
+  get_url: url={{influxdb_dl_url}} dest={{influxdb_pkg}}
+  tags:
+    - influxdb
+
+- name: Install package
+  command: dpkg --skip-same-version -i /usr/local/src/influxdb_{{ influxdb_ver }}_{{ influxdb_arch }}.deb
+  register: dpkg_result
+  changed_when: "dpkg_result.stdout.startswith('Selecting')"
+  tags:
+    - influxdb
+
+- name: Remove init.d script
+  file: path=/etc/init.d/influxdb state=absent
+  when: influxdb_keep_initd == true
+  tags:
+    - influxdb
+
+- name: Check for ip address in config file
+  command: grep -E '^\s*hostname.*{{influxdb_hostname}}' {{influxdb_config_file}}
+  register: config_has_ip
+  ignore_errors: true
+  changed_when: false
+  tags:
+    - influxdb
+
+- name: Delete raft dir before hostname change
+  file: dest={{influxdb_raft_dir}} state=absent
+  when: config_has_ip|failed
+  tags:
+    - influxdb
+
+- name: Create storage dir
+  file: path="{{influxdb_storage_dir}}" state=directory group={{influxdb_group}} owner={{influxdb_user}}
+  tags:
+    - influxdb
+
+- name: Ensure log directory
+  file: path="{{influxdb_log_dir}}" state=directory group={{influxdb_group}} owner={{influxdb_user}}
+  tags:
+    - influxdb
+
+- name: Write config
+  template: src=conf.j2 dest={{influxdb_config_file}} group={{influxdb_group}} owner={{influxdb_user}}
+  notify:
+    - restart influxdb
+  tags:
+    - influxdb
+
+- name: Write upstart
+  template: src=upstart.j2 dest=/etc/init/influxdb_conf mode=0755
+  when: influxdb_keep_initd == false
+  tags:
+    - influxdb
+
+- name: Start influxdb service
+  service: name=influxdb state=started
+  tags:
+    - influxdb
+
+- name: Make sure influxdb api port is open
+  wait_for: port=8086 delay=2
+  when: not influxdb_seed_servers
+
+- name: Copy influxdb database shard config
+  template: src=influxdb.json.j2 dest=~/influxdb.json
+  when: not influxdb_seed_servers
+  tags:
+    - influxdb
+
+- name: Copy grafana database shard config
+  template: src=grafana.json.j2 dest=~/grafana.json
+  when: not influxdb_seed_servers
+  tags:
+    - influxdb
+
+- name: Create and define influxdb database
+  shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/influxdb?u=root&p=root\" -d @influxdb.json"
+  when: not influxdb_seed_servers
+  tags:
+    - influxdb
+
+- name: Create and define grafana database
+  shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/grafana?u=root&p=root\" -d @grafana.json"
+  when: not influxdb_seed_servers
+  tags:
+    - influxdb
+
+- name: Create grafana user
+  shell: "curl -X POST \"http://localhost:8086/db/grafana/users?u=root&p=root\" -d '{\"name\": \"grafana\", \"password\": \"grafana\", \"readFrom\": \".*\", \"writeTo\": \"grafana\"}'"
+  tags:
+    - influxdb
+
+- name: Create influx db client user
+  shell: "curl -X POST \"http://localhost:8086/db/influxdb/users?u=root&p=root\" -d '{\"name\": \"influx\", \"password\": \"{{ influxdb_influx_password }}\", \"readFrom\": \".*\", \"writeTo\": \"influxdb\"}'"
+  tags:
+    - influxdb
+
+- name: Change root password
+  shell: "curl -X POST \"http://localhost:8086/cluster_admins/root?u=root&p=root\" -d '{\"password\": \"{{ influxdb_root_password }}\"}'"
+  tags:
+    - influxdb
+
+#- name: Ensure iptables dir
+#  file: path=/etc/iptables.d/ state=directory mode=750
+#
+#- name: Iptables
+#  template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
+#  tags:
+#    - influxdb
+#    - iptables

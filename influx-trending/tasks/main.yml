@@ -1,0 +1,63 @@
+---
+
+- name: ensure pip and git are installed
+  apt: name={{ item }} update_cache=yes
+  with_items:
+    - python3
+    - python3-pip
+    - git
+  tags:
+    - influx-trending
+
+- name: ensure virtualenv is installed (with python3)
+  pip: name=virtualenv state=latest executable=pip-3.2
+  tags:
+    - influx-trending
+
+- name: git clone repo
+  git: repo=https://github.com/theonion/influx-trending.git dest=/var/influx-trending
+  tags:
+    - influx-trending
+
+- name: create virtualenv
+  command: virtualenv -p python3 /var/venvs/influx-trending
+  tags:
+    - influx-trending
+
+- name: pip install required packages
+  pip: requirements="/var/influx-trending/requirements.txt" virtualenv="/var/venvs/influx-tending"
+  tags:
+    - influx-trending
+
+- name: copy hourly trending script
+  template: src=hourly.sh.j2 dest=/var/influx-trending/hourly.sh mode="0711"
+  tags:
+    - influx-trending
+
+- name: copy daily trending script
+  template: src=daily.sh.j2 dest=/var/influx-trending/daily.sh mode="0711"
+  tags:
+    - influx-trending
+
+- name: copy fively trending script
+  template: src=fively.sh.j2 dest=/var/influx-trending/fively.sh mode="0711"
+  tags:
+    - influx-trending
+
+- name: create cron job for hourly script
+  cron: name="influx-trending hourly" minute="0" job="/var/influx-trending/hourly.sh"
+  tags:
+    - influx-trending
+
+- name: create cron job for daily script
+  cron: name="influx-trending daily" minute="0" hour="0" job="/var/influx-trending/daily.sh"
+  tags:
+    - influx-trending
+
+- name: create cron job for fively script
+  cron: name="influx-trending fively" minute="*/5" job="/var/influx-trending/fively.sh"
+  tags:
+    - influx-trending
+
+- name: restart cron
+  service: name="cron" state=restarted

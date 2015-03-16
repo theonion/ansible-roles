@@ -1,0 +1,44 @@
+define(['settings'], function (Settings) {
+  return new Settings({
+
+    datasources: {
+      influxdb: {
+        type: 'influxdb',
+        url: "http://{{ grafana_influxdb_hostname }}:8086/db/influxdb",
+        username: 'grafana',
+        password: 'grafana',
+        default: true
+      },
+
+      grafana: {
+        type: 'influxdb',
+        url: "http://{{ grafana_influxdb_hostname }}:8086/db/grafana",
+        username: 'grafana',
+        password: 'grafana',
+        grafanaDB: true
+      },
+    },
+
+    search: {
+      max_results: {{ grafana_max_results }}
+    },
+
+    default_route: '/dashboard/file/default.json',
+
+    unsaved_changes_warning: true,
+
+    playlist_timespan: "{{ grafana_playlist_timespan }}",
+
+    admin: {
+      password: '{{ grafana_admin_password }}'
+    },
+
+    window_title_prefix: '{{ grafana_window_title_prefix }} | ',
+
+    plugins: {
+      panels: [],
+      dependencies: []
+    }
+
+  });
+});

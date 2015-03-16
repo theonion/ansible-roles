@@ -1,0 +1,69 @@
+---
+# sets variable default vales
+
+influxdb_ver: "0.8.7"
+influxdb_arch: "amd64"
+influxdb_dl_url: "http://s3.amazonaws.com/influxdb/influxdb_{{ influxdb_ver }}_{{ influxdb_arch }}.deb"
+influxdb_pkg: "/usr/local/src/influxdb_{{ influxdb_ver }}_{{ influxdb_arch }}.deb"
+influxdb_maxprocs: "{{ ansible_processor_vcpus }}"
+influxdb_keep_initd: false
+influxdb_user: "influxdb"
+influxdb_group: "influxdb"
+influxdb_pid: "/var/run/influxdb/influxdb.pid"
+
+#
+# Config
+#
+influxdb_bind_addr: "0.0.0.0"
+
+# [logging]
+influxdb_log_level: "info"
+influxdb_log_dir: "/var/log/influxdb/"
+influxdb_log_file: "{{ influxdb_log_dir }}/influxdb.log"
+
+# [admin]
+influxdb_admin_port: 8083
+
+# [api]
+influxdb_api_port: 8086
+influxdb_read_timeout: "5s"
+
+# [input plugins]
+influxdb_graphite_plugin_enabled: "false"
+influxdb_graphite_plugin_port: 2003
+influxdb_graphite_plugin_db: "metrics"
+
+# [raft]
+influxdb_raft_port: 8090
+influxdb_raft_log_dir: "/var/log/influxdb/raft"
+influxdb_raft_dir: "/opt/influxdb/shared/data/raft"
+
+# [storage]
+influxdb_storage_dir: "/mnt/influxdb/db"
+influxdb_config_file: "/opt/influxdb/shared/config.toml"
+influxdb_write_buffer: 10000
+
+# [cluster]
+influxdb_seed_servers: null
+influxdb_proto_port: 8099
+influxdb_proto_timeout: "2s"
+influxdb_proto_heartbeat: "200ms"
+influxdb_proto_min_backoff: "1s"
+influxdb_proto_min_backoff: "10s"
+influxdb_write_buffer: 10000
+influxdb_resp_buffer: 100000
+influxdb_shard_q_limit: 10
+
+# [sharding]
+influxdb_repl_factor: 1
+influxdb_short_term_dur: "7d"
+influxdb_short_term_split: 1
+influxdb_long_term_dur: "30d"
+influxdb_long_term_split: 1
+
+# [wal]
+influxdb_wal_dir: "/mnt/influxdb/wal"
+influxdb_wal_flush: 1000
+influxdb_wal_bookmark: 1000
+influxdb_wal_index: 1000
+influxdb_wal_logfile_req: 10000

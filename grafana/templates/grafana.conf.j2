@@ -1,0 +1,10 @@
+server {
+  listen 80;
+  server_name {{ inventory_hostname }};
+  root html;
+  index index.html index.htm;
+  location / {
+    root /www/grafana;
+    index index.html;
+  }
+}

@@ -1,0 +1,15 @@
+description "Influxdb"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+
+limit nofile unlimited unlimited
+
+console log
+
+env GOMAXPROCS={{ influxdb_maxprocs }}
+
+exec sudo su -u {{ influxdb_user }} -c "usr/bin/influxdb -config={{ influxdb_config_file }}"

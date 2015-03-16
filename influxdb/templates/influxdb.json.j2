@@ -1,0 +1,44 @@
+{
+  "spaces": [
+    {
+      "name": "everything",
+      "retentionPolicy": "14d",
+      "shardDuration": "1d",
+      "regex": "/.*/",
+      "replicationFactor": {{ influxdb_repl_factor }},
+      "split": 1
+    },
+    {
+      "name": "5m-rollups",
+      "retentionPolicy": "30d",
+      "shardDuration": "7d",
+      "regex": "/.*\\.rollup.5m.*/",
+      "replicationFactor": {{ influxdb_repl_factor }},
+      "split": 1
+    },
+    {
+      "name": "1h-rollups",
+      "retentionPolicy": "90d",
+      "shardDuration": "7d",
+      "regex": "/.*\\.rollup.1h.*/",
+      "replicationFactor": {{ influxdb_repl_factor }},
+      "split": 1
+    },
+    {
+      "name": "1d-rollups",
+      "retentionPolicy": "1825d",
+      "shardDuration": "30d",
+      "regex": "/.*\\.rollup.1d.*/",
+      "replicationFactor": {{ influxdb_repl_factor }},
+      "split": 1
+    }
+  ],
+  "continuousQueries": [
+    "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(5m) into :series_name.rollup.5m",
+    "select percentile(clicks, 99) as threshold from /^.*\\.rollup.5m$/ group by time(5m) into :series_name.percentile.99",
+    "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(1h) into :series_name.rollup.1h",
+    "select percentile(clicks, 99) as threshold from /^.*\\.rollup.1h$/ group by time(1h) into :series_name.percentile.99",
+    "select content_id, sum(clicks) as clicks from /^[a-zA-Z0-9_\\-]+$/ group by content_id, time(1d) into :series_name.rollup.1d",
+    "select percentile(clicks, 99) as threshold from /^.*\\.rollup.1d$/ group by time(1d) into :series_name.percentile.99"
+  ]
+}

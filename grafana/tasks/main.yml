@@ -1,0 +1,48 @@
+---
+
+- name: Download source
+  get_url: url=http://grafanarel.s3.amazonaws.com/{{ grafana_version }}.tar.gz dest=~/
+  tags:
+    - grafana
+
+- name: Extract archive
+  shell: tar -xzf ~/{{ grafana_version }}.tar.gz
+  tags:
+    - grafana
+
+- name: Make sure the www dir exists
+  file: path=/www state=directory mode=750 owner=www-data group=www-data
+  tags:
+    - grafana
+
+- name: Make sure the www/grafana dir exists
+  file: path=/www/grafana state=directory mode=750 owner=www-data group=www-data
+  tags:
+    - grafana
+
+- name: Copy resources
+  shell: cp -rf /var/ansible/{{ grafana_version }}/* /www/grafana
+  tags:
+    - grafana
+
+- name: Chown resources
+  shell: chown -R www-data /www/grafana
+  tags:
+    - grafana
+
+- name: Copy config template
+  template: src=config.js.j2 dest=/www/grafana/config.js
+  tags:
+    - grafana
+
+- name: Copy nginx config
+  template: src=grafana.conf.j2 dest=/etc/nginx/conf.d/grafana.conf
+  tags:
+    - grafana
+    - nginx
+
+- name: Restart nginx
+  service: name=nginx state=restarted
+  tags:
+    - grafana
+    - nginx
