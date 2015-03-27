@@ -7,15 +7,18 @@
     - openjdk-7-jre
 
 - name: Add the apt key for the elasticsearch repo
-  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
+  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch id=D88E42B4 state=present
 
-- name: Add the elasticsearch 0.90.x apt repo
-  apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/0.90/debian stable main" state=present
-  when: elasticsearch_version.startswith("0.90.")
-
-- name: Add the elasticsearch 1.x apt repo
-  apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/1.0/debian stable main" state=present
-  when: elasticsearch_version.startswith("1.")
+- name: Add the elasticsearch apt repo
+  apt_repository: repo="deb http://packages.elasticsearch.org/elasticsearch/{{ item }}/debian stable main" state=present
+  when: elasticsearch_version.startswith("{{ item }}.")
+  with_items:
+      - "0.90"
+      - 1.0
+      - 1.1
+      - 1.2
+      - 1.3
+      - 1.4
 
 - name: Update repositories cache and install elasticsearch
   apt: name=elasticsearch={{ elasticsearch_version }} update_cache=yes
