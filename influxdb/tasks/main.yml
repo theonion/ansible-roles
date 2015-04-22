@@ -1,6 +1,6 @@
 ---
 
-- name: Download version
+- name: Download package
   get_url: url={{influxdb_dl_url}} dest={{influxdb_pkg}}
   tags:
     - influxdb
@@ -70,26 +70,9 @@
   tags:
     - influxdb
 
-- name: Copy grafana database shard config
-  template: src=grafana.json.j2 dest=~/grafana.json
-  when: not influxdb_seed_servers
-  tags:
-    - influxdb
-
 - name: Create and define influxdb database
   shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/influxdb?u=root&p=root\" -d @influxdb.json"
   when: not influxdb_seed_servers
-  tags:
-    - influxdb
-
-- name: Create and define grafana database
-  shell: "cd ~ && curl -X POST \"http://localhost:8086/cluster/database_configs/grafana?u=root&p=root\" -d @grafana.json"
-  when: not influxdb_seed_servers
-  tags:
-    - influxdb
-
-- name: Create grafana user
-  shell: "curl -X POST \"http://localhost:8086/db/grafana/users?u=root&p=root\" -d '{\"name\": \"grafana\", \"password\": \"grafana\", \"readFrom\": \".*\", \"writeTo\": \"grafana\"}'"
   tags:
     - influxdb
 
@@ -102,12 +85,3 @@
   shell: "curl -X POST \"http://localhost:8086/cluster_admins/root?u=root&p=root\" -d '{\"password\": \"{{ influxdb_root_password }}\"}'"
   tags:
     - influxdb
-
-#- name: Ensure iptables dir
-#  file: path=/etc/iptables.d/ state=directory mode=750
-#
-#- name: Iptables
-#  template: src=iptables.j2 dest=/etc/iptables.d/05-influxdb
-#  tags:
-#    - influxdb
-#    - iptables
