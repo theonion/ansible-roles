@@ -1,0 +1,25 @@
+---
+- name: Add apt key for icinga repo
+  apt_key: url=http://packages.icinga.org/icinga.key id=34410682 state=present
+
+- name: Install icinga PPA
+  apt_repository: repo="deb http://packages.icinga.org/debian icinga-wheezy main"
+
+- name: Install icinga2
+  apt: name=icinga2 update_cache=yes
+
+- name: Install icinga2 check plugins
+  apt: name=nagios-plugins update_cache=yes
+
+- name: Copy plugins
+  copy: src=plugins/ dest=/usr/lib/nagios/plugins owner=root group=root mode=755
+
+#- name: Enable Icinga2 features
+#  command: /usr/sbin/icinga2 feature enable {{ item }}
+#  args:
+#    creates: /etc/icinga2/features-enabled/{{ item }}.conf
+#  with_items:
+#    - api
+#  notify: Restart icinga2
+
+- service: name=icinga2 state=started
