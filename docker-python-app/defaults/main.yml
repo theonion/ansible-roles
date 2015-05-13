@@ -1,0 +1,11 @@
+---
+# Defaults for python uwsgi apps
+#virtualenv_dir: "/var/venvs/{{ app_name }}"
+#source_dir: "/www/{{ app_name }}"
+#app_enabled: False
+appuser: "www-data"
+#system_packages: []
+#python_packages: []
+#python_requirements: null
+authorized_keys: []
+env_vars: []

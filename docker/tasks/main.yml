@@ -1,0 +1,21 @@
+---
+# Docker requires Debian 8 Jessie
+
+# mparent(2015-05-08): docker.io currently not available in jessie or jessie-backports
+#- apt_repository: repo="deb http://http.debian.net/debian jessie-backports main" update_cache=yes
+#- name: install docker (apt)
+#  apt: name=docker.io state=present update_cache=yes
+
+- name: install docker
+  shell: curl -sSL https://get.docker.com/ | sh
+  args:
+    creates: /usr/bin/docker
+
+# Base Debian-8 PIP is too old
+# TODO: Consider moving this into roles/common/
+- shell: easy_install pip
+  args:
+    creates: /usr/local/bin/pip
+
+- name: install python docker client (allows ansible control)
+  pip: name=docker-py executable=/usr/local/bin/pip
