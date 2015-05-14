@@ -19,3 +19,6 @@
 
 - name: install python docker client (allows ansible control)
   pip: name=docker-py executable=/usr/local/bin/pip
+
+- name: make sure docker is started (and runs on boot)
+  service: name=docker state=started enabled=yes
