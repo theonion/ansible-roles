@@ -1,5 +1,8 @@
 ---
-# Docker requires Debian 8 Jessie
+
+- name: Verify running Debian 8+
+  fail: msg="Docker requires Debian 8 Jessie"
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version < "8"
 
 # mparent(2015-05-08): docker.io currently not available in jessie or jessie-backports
 #- apt_repository: repo="deb http://http.debian.net/debian jessie-backports main" update_cache=yes
