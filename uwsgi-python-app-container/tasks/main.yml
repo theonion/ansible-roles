@@ -1,25 +1,30 @@
 ---
 # Installs and configures uWSGI python app in a docker container
 
+# TODO: May not need this anymore with new workflow
 # Create the user (if necessary)
 - user: name={{ appuser }} shell=/bin/bash createhome=yes group=www-data groups=docker
   when: appuser == "www-data"
-  tags: docker
-
-## Create the app user (if necessary)
-#- user: name={{ app_name }} shell=/bin/bash createhome=yes group=www-data
-#  tags: docker
 
 - name: make sure .ssh folder exists for app
   file: path=/var/www/.ssh mode=700 state=directory owner=www-data
-  tags: docker
 
 - name: add the authorized keys
   authorized_key: user=www-data key="{{ item }}"
   with_items: authorized_keys
-  tags: docker
+# END TODO
 
-## Create a uwsgi configuration file
-#- template: src=uwsgi.ini.j2 dest=/etc/uwsgi-emperor/vassals/{{ app_name }}.ini owner={{ appuser }} group=www-data
-#  when: app_enabled
-#  tags: docker
+- name: run app container
+  docker:
+    name: "{{ app_name }}"
+    command: uwsgi {{ uwsgi_ini }}
+    registry: "{{ registry }}"
+    image: "{{ image }}"
+    # TODO: reloaded doesn't work with ansible 1.9.1
+    state: restarted
+    docker_api_version: "{{ docker_api_version }}"
+    # TODO: or 'always'?
+    restart_policy: on-failure
+    env: "{{ env_vars }}"
+
+# TODO: Add a docker cleanup command?

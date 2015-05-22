@@ -1,11 +1,7 @@
 ---
-# Defaults for python uwsgi apps
-#virtualenv_dir: "/var/venvs/{{ app_name }}"
-#source_dir: "/www/{{ app_name }}"
-#app_enabled: False
-appuser: "www-data"
-#system_packages: []
-#python_packages: []
-#python_requirements: null
+# Defaults for python uwsgi app containers
 authorized_keys: []
 env_vars: []
+docker_api_version: "1.6.1"
+# NOTE: This is a private repo
+registry: registry.onion.com
