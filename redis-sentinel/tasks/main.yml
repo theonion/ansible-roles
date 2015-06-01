@@ -1,0 +1,30 @@
+---
+- name: sentinel init script
+  copy: src="redis-sentinel.service" dest="/lib/systemd/system/redis-sentinel.service" mode=644
+  register: sentinel_service_script
+
+- name: reload systemctl
+  command: systemctl daemon-reload
+  when: sentinel_service_script.changed
+
+- name: sentinel config
+  lineinfile: dest=/etc/redis/sentinel.conf line='{{ item.key }} {{ item.value }}' regexp='^{{ item.key }} .*'
+  with_items:
+    - { key: "bind",
+        value: "{{ sentinel_bind }}"}
+    - { key: "port",
+        value: "{{ sentinel_port }}"}
+    - { key: "sentinel monitor",
+        value: "{{ sentinel_redis_master_name }} {{ sentinel_redis_master_ip }} {{ sentinel_redis_master_port }} {{ sentinel_quorum }}" }
+    - { key: "sentinel down-after-milliseconds",
+        value: "{{ sentinel_redis_master_name }} {{ sentinel_down_after_milliseconds }}" }
+    - { key: "sentinel parallel-syncs",
+        value: "{{ sentinel_redis_master_name }} {{ sentinel_parallel_syncs }}" }
+    - { key: "sentinel failover-timeout",
+        value: "{{ sentinel_redis_master_name }} {{ sentinel_failover_timeout }}" }
+  notify: Restart redis sentinel
+
+- name: set sentinel config permissions
+  file: path="/etc/redis/sentinel.conf" owner=redis mode=644
+
+- service: name="redis-sentinel" state=started

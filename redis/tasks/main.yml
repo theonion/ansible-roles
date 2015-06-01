@@ -1,0 +1,26 @@
+---
+# Redis recommends avoiding package managers due to staleness, but this is much simpler to setup and we don't need
+# cutting edge (yet).
+- name: install redis
+  apt: name=redis-server state=present update_cache=yes cache_valid_time=3600
+
+#- name: download redis
+#  command: wget http://download.redis.io/redis-stable.tar.gz
+#  args:
+#    creates: redis-stable.tar.gz
+
+#- name: extract redis
+#  command: tar xvzf redis-stable.tar.gz
+#  args:
+#    creates: redis-stable/
+
+#- name: install redis
+#  shell: make && make install
+#  args:
+#    chdir: redis-stable
+#    creates: /usr/local/bin/redis-server
+
+- name: redis config
+  lineinfile: dest=/etc/redis/redis.conf line='{{ item.0 }} {{ item.1 }}' regexp='^{{ item.0 }} .*'
+  with_items: redis_config.items()
+  notify: Restart redis

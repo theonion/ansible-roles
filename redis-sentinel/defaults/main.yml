@@ -1,0 +1,10 @@
+---
+sentinel_bind: 127.0.0.1
+sentinel_port: 26379
+sentinel_redis_master_name: mymaster
+sentinel_redis_master_port: 6379
+sentinel_quorum: 2
+sentinel_down_after_milliseconds: 30000
+sentinel_parallel_syncs: 1
+sentinel_failover_timeout: 180000
+

@@ -1,0 +1,4 @@
+---
+
+- name: Restart redis sentinel
+  service: name=redis-sentinel state=restarted

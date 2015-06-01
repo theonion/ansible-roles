@@ -1,0 +1,3 @@
+---
+sentinal_port: 5000
+redis_quorum: 2
