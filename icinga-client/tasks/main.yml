@@ -2,8 +2,13 @@
 - name: Add apt key for icinga repo
   apt_key: url=http://packages.icinga.org/icinga.key id=34410682 state=present
 
-- name: Install icinga PPA
+- name: Install icinga PPA (Debian 7)
   apt_repository: repo="deb http://packages.icinga.org/debian icinga-wheezy main"
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "7"
+
+- name: Install icinga PPA (Debian 8)
+  apt_repository: repo="deb http://packages.icinga.org/debian icinga-jessie main"
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
 
 - name: Install icinga2
   apt: name=icinga2 update_cache=yes
@@ -11,8 +16,8 @@
 - name: Install icinga2 check plugins
   apt: name=nagios-plugins update_cache=yes
 
-- name: Copy plugins
-  copy: src=plugins/ dest=/usr/lib/nagios/plugins owner=root group=root mode=755
+#- name: Copy plugins
+#  copy: src=plugins/ dest=/usr/lib/nagios/plugins owner=root group=root mode=755
 
 #- name: Enable Icinga2 features
 #  command: /usr/sbin/icinga2 feature enable {{ item }}
