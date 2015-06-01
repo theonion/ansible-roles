@@ -1,0 +1,7 @@
+---
+# Defaults for python uwsgi app containers
+authorized_keys: []
+env_vars: []
+docker_api_version: "1.6.1"
+# NOTE: This is a private repo
+registry: registry.onion.com
