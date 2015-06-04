@@ -4,7 +4,7 @@ sentinel_port: 26379
 sentinel_redis_master_name: mymaster
 sentinel_redis_master_port: 6379
 sentinel_quorum: 2
-sentinel_down_after_milliseconds: 30000
+sentinel_down_after_milliseconds: 10000
 sentinel_parallel_syncs: 1
-sentinel_failover_timeout: 180000
+sentinel_failover_timeout: 60000
 
