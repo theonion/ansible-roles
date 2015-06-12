@@ -58,11 +58,13 @@
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   with_items: python_packages
   when: python_requirements == None
+  notify: Restart uwsgi
   tags: uwsgi
 
 # Install python packages
 - pip: requirements="{{python_requirements}}" state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   when: python_requirements != None
+  notify: Restart uwsgi
   tags: uwsgi
 
 # Create virtualenv directory

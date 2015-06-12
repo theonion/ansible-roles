@@ -1,0 +1,3 @@
+---
+- name: Restart uwsgi
+  file: path=/etc/uwsgi-emperor/vassals/{{ app_name }}.ini state=touch owner=www-data group=www-data
