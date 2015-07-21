@@ -15,7 +15,7 @@
   when: ansible_os_family == "Debian"
 
 - name: set postgres config path
-  when: postgres_path is defined
+  when: postgres_path is defined and 'stdout' in postgres_path
   set_fact: ps_config_path={{ postgres_path.stdout }}/main
 
 - name: update postgresql.conf
@@ -24,6 +24,7 @@
     insertbefore: "^#listen_addresses ="
     line: listen_addresses = '{{ postgres_listen_addresses|default("localhost") }}'
     state: present
+  when: ps_config_path is defined
   notify:
     - restart postgres
 
@@ -33,6 +34,7 @@
     insertafter: '^host[ ]{1,}all[ ]{1,}all[ ]{1,}[ ]{1,}127\.0\.0\.1\/32[ ]{1,}md5$'
     line: 'host    all             all             192.168.0.0/16          md5'
     state: present
+  when: ps_config_path is defined
   notify:
     - restart postgres
 
