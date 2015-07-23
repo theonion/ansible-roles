@@ -12,12 +12,17 @@
 
 - name: Install icinga2
   apt: name=icinga2 update_cache=yes
+  with_items:
+    - icinga2
+    - nagios-plugins
 
-- name: Install icinga2 check plugins
-  apt: name=nagios-plugins update_cache=yes
+- name: Copy check plugins
+  copy: src=plugins/ dest=/usr/lib/nagios/plugins/ mode=755 owner=root group=root
 
-#- name: Copy plugins
-#  copy: src=plugins/ dest=/usr/lib/nagios/plugins owner=root group=root mode=755
+- name: Copy remote command config
+  copy: src=commands.conf dest=/etc/icinga2/conf.d/commands.conf owner=root group=root mode=644
+  when: ansible_hostname != "monitor01"
+  notify: Reload icinga2
 
 #- name: Enable Icinga2 features
 #  command: /usr/sbin/icinga2 feature enable {{ item }}
