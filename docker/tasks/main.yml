@@ -17,6 +17,9 @@
     creates: /usr/bin/docker
   when: docker_install_method == "script"
 
+- name: add ansible to docker group
+  user: name=ansible groups=docker append=yes
+
 - name: make sure docker is started (and runs on boot)
   service: name=docker state=started enabled=yes
 
@@ -26,4 +29,3 @@
     creates: /usr/local/bin/pip
 - name: install python docker client (allows ansible control)
   pip: name=docker-py executable=/usr/local/bin/pip
-
