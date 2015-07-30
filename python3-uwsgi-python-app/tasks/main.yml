@@ -7,11 +7,11 @@
     - python3-pip
 
 - name: python3-uwsgi-emperor | ensure uwsgi is installed
-  pip: name=uwsgi state=latest executable=pip-3.2
+  pip: name=uwsgi state=latest executable=pip3
   sudo: yes
 
 - name: python3-uwsgi-python-app | ensure virtualenv is installed
-  pip: name=virtualenv state=latest executable=pip-3.2
+  pip: name=virtualenv state=latest executable=pip3
 
 - name: python3-uwsgi-python-app | ensure system packages installed
   apt: name={{ item }} state=latest
@@ -44,7 +44,7 @@
   command: su {{ appuser }} -c "virtualenv -p python3 {{ virtualenv_dir }}" creates={{ virtualenv_dir }}/bin/activate
 
 - name: python3-uwsgi-python-app | install python packages
-  pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }} executable=pip-3.2
+  pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }} executable=pip3
   with_items: python_packages
 
 - name: python3-uwsgi-python-app | create virtualenv directory

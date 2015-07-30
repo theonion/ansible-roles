@@ -7,7 +7,7 @@
     - python-pip3
 
 - name: python3-uwsgi-emperor | ensure uwsgi is installed
-  pip: name=uwsgi state=latest executable=pip-3.2
+  pip: name=uwsgi state=latest executable=pip3
   sudo: yes
 
 - name: python3-uwsgi-emperor | set uwsgi binary path
