@@ -6,12 +6,28 @@
     - python3
     - python3-pip
 
+- name: Overriding Debian version variable
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
+  set_fact:
+    jessie: true
+
 - name: python3-uwsgi-emperor | ensure uwsgi is installed
   pip: name=uwsgi state=latest executable=pip3
   sudo: yes
+  when: jessie
+
+- name: python3-uwsgi-emperor | ensure uwsgi is installed
+  pip: name=uwsgi state=latest executable=pip-3.2
+  sudo: yes
+  when: not jessie
 
 - name: python3-uwsgi-python-app | ensure virtualenv is installed
   pip: name=virtualenv state=latest executable=pip3
+  when: jessie
+
+- name: python3-uwsgi-python-app | ensure virtualenv is installed
+  pip: name=virtualenv state=latest executable=pip-3.2
+  when: not jessie
 
 - name: python3-uwsgi-python-app | ensure system packages installed
   apt: name={{ item }} state=latest
@@ -46,6 +62,12 @@
 - name: python3-uwsgi-python-app | install python packages
   pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }} executable=pip3
   with_items: python_packages
+  when: jessie
+
+- name: python3-uwsgi-python-app | install python packages
+  pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }} executable=pip-3.2
+  with_items: python_packages
+  when: not jessie
 
 - name: python3-uwsgi-python-app | create virtualenv directory
   file: path={{ virtualenv_dir }} state=directory owner={{ appuser }} group=www-data recurse=yes
