@@ -4,26 +4,44 @@
     - python-apt
     - python-pycurl
 
+- name: Overriding Debian version variable
+  when: ansible_distribution == "Debian" and ansible_distribution_major_version == "8"
+  set_fact:
+    jessie: true
+
+- name: Overriding is_debian
+  when: ansible_distribution != "Debian"
+  set_fact:
+    is_debian: false
+
 - name: Add the debian wheezy-backports repo
   apt_repository: repo='deb http://ftp.us.debian.org/debian wheezy-backports main' state=present
-  when: ansible_distribution == "Debian"  # Should make sure this is wheezy at some point, but for now, fuck it.
+  when: is_debian and not jessie
 
 - name: Install nodejs
   apt: name=nodejs state=present default_release=wheezy-backports
+  when: not jessie
 
-# So, it turns out that debian is fucking stupid, and installs node at /usr/bin/nodejs, WHICH IS NOT THE RIGHT BINARY NAME
+- name: Install nodejs
+  apt: name=nodejs state=present
+  when: jessie
+
 - name: Symlink the node BINARY
   file: state=link src=/usr/bin/nodejs path=/usr/bin/node
 
 - name: Check if npm is installed
   command: which npm
   register: npm_installed
-  ignore_errors: True
+  ignore_errors: yes
 
 - name: Get the npm install script
   get_url: dest=/tmp/npm_install.sh url=https://www.npmjs.org/install.sh
-  when: npm_installed|failed
+  when: npm_installed|failed and not jessie
 
 - name: Install npm
   raw: sh /tmp/npm_install.sh
-  when: npm_installed|failed
+  when: npm_installed|failed and not jessie
+
+- name: Install NPM
+  apt: name=npm state=present
+  when: npm_installed|failed and jessie
