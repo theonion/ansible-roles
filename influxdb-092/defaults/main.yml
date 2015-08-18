@@ -1,0 +1,46 @@
+---
+# influxdb default variable values
+
+##
+# system vars
+influxdb_system_arch: amd64
+
+
+##
+# deb
+influxdb_version: 0.9.2
+influxdb_deb_package: "influxdb_{{ influxdb_version }}_{{ influxdb_system_arch }}.deb"
+influxdb_deb_url: "http://influxdb.s3.amazonaws.com/{{ influxdb_deb_package }}"
+influxdb_deb_dir: /usr/local/src
+influxdb_deb_dest: "{{ influxdb_deb_dir }}/{{ influxdb_deb_package }}"
+
+
+##
+# symlinking
+influxdb_repl_cmd: /opt/influxdb/influx
+influxdb_repl_dest: /usr/local/bin/influx
+influxdb_mgmt_cmd: /opt/influxdb/influxd
+influxdb_mgmt_dest: /usr/local/bin/influxd
+influxdb_init_cmd: /opt/influxdb/init.sh
+influxdb_init_dest: /etc/init.d/influxdb
+
+
+##
+# database configs
+influxdb_db_name: influxdb
+influxdb_create_db: "CREATE DATABASE {{ influxdb_db_name }}"
+
+
+##
+# retention policies
+influxdb_retention_policies:
+  - "CREATE RETENTION POLICY default_2_weeks ON {{ influxdb_db_name }} DURATION 2w REPLICATION 1 DEFAULT"
+
+
+##
+# continuous queries
+influxdb_continuous_queries:
+  - "CREATE CONTINUOUS QUERY onion_trending_5m ON {{ influxdb_db_name }} BEGIN SELECT SUM(value) AS value INTO onion_trending_5m FROM onion_trending GROUP BY time(5m), * END"
+  - "CREATE CONTINUOUS QUERY avclub_trending_5m ON {{ influxdb_db_name }} BEGIN SELECT SUM(value) AS value INTO avclub_trending_5m FROM avclub_trending GROUP BY time(5m), * END"
+  - "CREATE CONTINUOUS QUERY clickhole_trending_5m ON {{ influxdb_db_name }} BEGIN SELECT SUM(value) AS value INTO clickhole_trending_5m FROM clickhole_trending GROUP BY time(5m), * END"
+  - "CREATE CONTINUOUS QUERY onionstudios_trending_5m ON {{ influxdb_db_name }} BEGIN SELECT SUM(value) AS value INTO onionstudios_trending_5m FROM onionstudios_trending GROUP BY time(5m), * END"

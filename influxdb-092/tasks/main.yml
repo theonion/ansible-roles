@@ -1,0 +1,65 @@
+---
+# installation tasks for influxdb
+
+- name: check for influxdb deb file
+  stat: path={{ influxdb_deb_dest }}
+  register: deb_file
+
+- name: download package
+  get_url: url={{ influxdb_deb_url }} dest={{ influxdb_deb_dest }}
+  when: deb_file.stat.exists == False
+  tags:
+    - influxdb
+
+- name: install package
+  apt: deb={{ influxdb_deb_dest }}
+  register: dpkg_result
+  changed_when: "dpkg_result.stdout.startswith('Selecting')"
+  tags:
+    - influxdb
+
+- name: symlink influx repl command
+  file: src={{ influxdb_repl_cmd }} dest={{ influxdb_repl_dest }} state=link
+  ignore_errors: yes
+  tags:
+    - influxdb
+
+- name: symlink influx mgmt command
+  file: src={{ influxdb_mgmt_cmd }} dest={{ influxdb_mgmt_dest }} state=link
+  ignore_errors: yes
+  tags:
+    - influxdb
+
+- name: restart machine
+  command: shutdown -r now "Ansible updates triggered"
+  async: 0
+  poll: 0
+  ignore_errors: yes
+  tags:
+    - influxdb
+
+- name: waiting for server to come back
+  local_action: wait_for host={{ inventory_hostname }} state=started
+  sudo: no
+  tags:
+    - influxdb
+
+- name: create the database
+  command: "influx -execute '{{ influxdb_create_db }}'"
+  ignore_errors: yes
+  tags:
+    - influxdb
+
+- name: create the default retention policies
+  command: "influx -execute '{{ item }}'"
+  with_items: influxdb_retention_policies
+  ignore_errors: yes
+  tags:
+    - influxdb
+
+- name: create the rollups
+  command: "influx -execute '{{ item }}'"
+  with_items: influxdb_continuous_queries
+  ignore_errors: yes
+  tags:
+    - influxdb
