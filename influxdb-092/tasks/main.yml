@@ -63,3 +63,8 @@
   ignore_errors: yes
   tags:
     - influxdb
+
+- name: change influxdb root user's password
+  command: "{{ influxdb_update_root_command }}"
+  tags:
+    - influxdb

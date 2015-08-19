@@ -38,6 +38,13 @@ influxdb_retention_policies:
 
 
 ##
+# password
+influxdb_root_username: root
+influxdb_root_password: root
+influxdb_update_root_command: "influx -database '{{ influxdb_db_name }}' -execute \"CREATE USER {{ influxdb_root_username }} WITH PASSWORD '{{ influxdb_root_password }}' WITH ALL PRIVILEGES\""
+
+
+##
 # continuous queries
 influxdb_continuous_queries:
   - "CREATE CONTINUOUS QUERY onion_trending_5m ON {{ influxdb_db_name }} BEGIN SELECT SUM(value) AS value INTO onion_trending_5m FROM onion_trending GROUP BY time(5m), * END"
