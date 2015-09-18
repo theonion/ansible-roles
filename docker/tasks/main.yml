@@ -36,3 +36,5 @@
   with_items:
     - docker_cleanup
     - detect_exposed_port
+
+- cron: name="docker cleanup" special_time="weekly" user=ansible job="/usr/local/bin/docker_cleanup"
