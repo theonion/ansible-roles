@@ -27,5 +27,12 @@
 - shell: curl -sSL --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7
   args:
     creates: /usr/local/bin/pip
+
 - name: install python docker client (allows ansible control)
   pip: name=docker-py executable=/usr/local/bin/pip
+
+- name: install common scripts
+  copy: src=scripts/{{ item }} dest=/usr/local/bin/{{ item }} mode=755
+  with_items:
+    - docker_cleanup
+    - detect_exposed_port

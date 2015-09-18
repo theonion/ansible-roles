@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+#
+# This is a workaround to detect which ephermal port was exposed by Docker, since this information
+# is not yet exposed by Docker (https://github.com/docker/docker/issues/3778).
+# Sources:
+#   https://groups.google.com/d/msg/docker-user/KUbcMt1lARE/o_ZpAVglcSAJ
+#   http://adetante.github.io/articles/service-discovery-with-docker-2/
+#
+
+from __future__ import print_function
+
+import argparse
+
+from docker import Client
+from docker.utils import kwargs_from_env
+
+
+def main():
+
+    parser = argparse.ArgumentParser(description='Detect exposed Docker port')
+    parser.add_argument('-d', '--docker-url',
+                        help=('Optional docker connection string (else Docker Machine / OSX '
+                              'assumed). ex: tcp://127.0.0.1:2375'))
+    parser.add_argument('container', help='Docker container to inspect')
+    parser.add_argument('port', help='Docker port to inspect. ex: 80/tcp')
+    parser.add_argument('--api-version', help='Docker API version to use')
+
+    args = parser.parse_args()
+    if args.docker_url:
+        kwargs = dict(base_url=args.docker_url)
+    else:
+        # Try to connect via Docker Machine (OSX) env settings
+        kwargs = kwargs_from_env()
+        kwargs['tls'].assert_hostname = False
+    client = Client(version=args.api_version, **kwargs)
+
+    # Read assigned port number
+    info = client.inspect_container(args.container)
+    port = info['NetworkSettings']['Ports'][args.port][0]['HostPort']
+    print(port, end='')
+
+
+if __name__ == '__main__':
+    main()

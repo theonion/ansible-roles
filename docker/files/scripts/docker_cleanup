@@ -1,0 +1,10 @@
+#----------------------------------------------------------------------
+# Generic Docker Cleanup
+#----------------------------------------------------------------------
+# As of 2015-09-18, there is no simple "docker clean" command, so these are cobbled together from various online posts.
+
+# Remove stopped containers
+docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
+
+# Remove unused images
+docker images -q -f "dangling=true" | xargs --no-run-if-empty docker rmi
