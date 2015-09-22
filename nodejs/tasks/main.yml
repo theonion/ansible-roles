@@ -35,7 +35,7 @@
   ignore_errors: yes
 
 - name: Get the npm install script
-  get_url: dest=/tmp/npm_install.sh url=https://www.npmjs.org/install.sh
+  get_url: dest=/tmp/npm_install.sh url=https://npmjs.com/install.sh
   when: npm_installed|failed and not jessie
 
 - name: Install npm
