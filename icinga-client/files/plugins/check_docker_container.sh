@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Source: https://gist.github.com/ekristen/11254304
 # Author: Erik Kristensen
 # Email: erik@erikkristensen.com
 # License: MIT
