@@ -27,4 +27,4 @@
 - name: set sentinel config permissions
   file: path="/etc/redis/sentinel.conf" owner=redis mode=644
 
-- service: name="redis-sentinel" state=started
+- service: name="redis-sentinel" state=started enabled=yes
