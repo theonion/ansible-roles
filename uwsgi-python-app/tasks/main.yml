@@ -48,13 +48,16 @@
   command: su {{ appuser }} -c "virtualenv {{ virtualenv_dir }}" creates={{ virtualenv_dir }}/bin/activate
   tags: uwsgi
 
-# - name: adding venv source to .profile 
+# - name: adding venv source to .profile
 #   lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='source .*/bin/activate' line='cd {{ source_dir }} && source /var/venvs/{{ app_name }}/bin/activate'
 
 # - name: adding DJANGO_SETTINGS_MODULE to .profile
 #   lineinfile: dest=/home/{{ app_name }}/.profile mode=700 owner={{ app_name }} regexp='DJANGO_SETTINGS_MODULE=*' line='export {{ env_vars[0] }}'
 
 # Install python packages
+- name: ensure uwsgi is installed
+  pip: name=uwsgi state=latest
+
 - pip: name={{ item }} state=present virtualenv={{ virtualenv_dir }} chdir={{ source_dir }}
   with_items: python_packages
   when: python_requirements == None
