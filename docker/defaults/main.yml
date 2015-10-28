@@ -1,2 +1,3 @@
 ---
 docker_install_method: apt
+docker_py_version: 1.3.1

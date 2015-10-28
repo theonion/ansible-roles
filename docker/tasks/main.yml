@@ -29,7 +29,7 @@
     creates: /usr/local/bin/pip
 
 - name: install python docker client (allows ansible control)
-  pip: name=docker-py executable=/usr/local/bin/pip
+  pip: name=docker-py version="{{ docker_py_version }}" executable=/usr/local/bin/pip 
 
 - name: install common scripts
   copy: src=scripts/{{ item }} dest=/usr/local/bin/{{ item }} mode=755
