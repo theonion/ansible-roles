@@ -3,6 +3,8 @@
 #----------------------------------------------------------------------
 # As of 2015-09-18, there is no simple "docker clean" command, so these are cobbled together from various online posts.
 
+# mparent(2015-10-29): This could be useful too: https://github.com/spotify/docker-gc
+
 # Remove stopped containers
 docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
 
