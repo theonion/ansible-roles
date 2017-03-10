@@ -1,0 +1,31 @@
+---
+
+- name: Disable multicast
+  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml line='discovery.zen.ping.multicast.enabled: false' regexp='(# )?discovery.zen.ping.multicast.enabled:' state=present"
+
+- name: Restart service
+  service: name=elasticsearch state=restarted
+
+- name: Make sure elasticsearch is started
+  shell: test -e /var/run/elasticsearch.pid
+
+- name: Wait for elasticsearch to respond
+  wait_for: port="{{elasticsearch_settings.get('http.port', 9200)}}" timeout=30
+
+- name: Check to make sure that we can get the status
+  shell: curl http://127.0.0.1:{{elasticsearch_settings.get('http.port', 9200)}}/_status
+
+- name: Index something
+  shell: curl http://127.0.0.1:{{elasticsearch_settings.get('http.port', 9200)}}/tests/test/1 -XPUT -d '{"a":"hey"}'
+
+- name: Check that its there
+  shell: curl http://127.0.0.1:{{elasticsearch_settings.get('http.port', 9200)}}/tests/test/1
+
+- name: Remove entire index
+  shell: curl http://127.0.0.1:{{elasticsearch_settings.get('http.port', 9200)}}/tests -XDELETE
+
+- name: Enable multicast
+  lineinfile: "dest=/etc/elasticsearch/elasticsearch.yml line='#discovery.zen.ping.multicast.enabled: false' regexp='(# )?discovery.zen.ping.multicast.enabled:' state=present"
+
+- name: Restart service
+  service: name=elasticsearch state=restarted
