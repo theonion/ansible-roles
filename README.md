@@ -8,6 +8,7 @@ This repo is an attempt to make some reusable, well tested ansible roles for ubu
 - [x] nginx
 - [x] memcached
 - [x] elasticsearch
+- [x] elasticsearch-1.5
 - [ ] postgresql
 - [x] redis
 - [x] rabbitmq
